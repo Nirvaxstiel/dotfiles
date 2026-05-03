@@ -1,0 +1,60 @@
+[colors]
+# Regular colors
+background = '#0C100C'
+black = '#1A2A1A'
+blue = '#00A5CF'
+cyan = '#00E5CC'
+foreground = '#C0F0E0'
+green = '#00CC99'
+magenta = '#B967FF'
+red = '#FF355A'
+white = '#E0F0E0'
+yellow = '#FFB347'
+
+# Cursor
+cursor = '#00FFCC'
+vi-cursor = '#FFB347'
+
+# Navigation
+tabs = '#1A2A1A'
+tabs-foreground = '#8A9A8A'
+tabs-active = '#2A3A2A'
+tabs-active-highlight = '#FF355A'
+tabs-active-foreground = '#F0FFF0'
+bar = '#1A2A1A'
+split = '#3A4A3A'
+
+# Search
+search-match-background = '#00CC99'
+search-match-foreground = '#0C100C'
+search-focused-match-background = '#FFB347'
+search-focused-match-foreground = '#0C100C'
+
+# Selection
+selection-foreground = '#0C100C'
+selection-background = '#00CC99'
+
+# Dim colors
+dim-black = '#0A150A'
+dim-blue = '#005F87'
+dim-cyan = '#008B8B'
+dim-foreground = '#A0B8A8'
+dim-green = '#008F6B'
+dim-magenta = '#7A3FB0'
+dim-red = '#B31E3F'
+dim-white = '#A0B0A0'
+dim-yellow = '#B28422'
+
+# Light colors
+light-black = '#3A4A3A'
+light-blue = '#6AB0FF'
+light-cyan = '#9EFFFF'
+light-foreground = '#F0FFF0'
+light-green = '#2EFFB3'
+light-magenta = '#D59BFF'
+light-red = '#FF6B7F'
+light-white = '#FFFFFF'
+light-yellow = '#FFD98C'
+
+hint-foreground = '#0C100C'  # Text color for hint labels
+hint-background = '#FFB347'  # Background color for hint labels
