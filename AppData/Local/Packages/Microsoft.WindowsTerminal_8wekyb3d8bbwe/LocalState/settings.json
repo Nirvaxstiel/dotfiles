@@ -1,0 +1,226 @@
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "actions": 
+    [
+        {
+            "command": 
+            {
+                "action": "copy",
+                "singleLine": false
+            },
+            "id": "User.copy.644BA8F2"
+        },
+        {
+            "command": "paste",
+            "id": "User.paste"
+        },
+        {
+            "command": "find",
+            "id": "User.find"
+        },
+        {
+            "command": 
+            {
+                "action": "splitPane",
+                "split": "auto",
+                "splitMode": "duplicate"
+            },
+            "id": "User.splitPane.A6751878"
+        }
+    ],
+    "alwaysShowNotificationIcon": false,
+    "copyFormatting": "none",
+    "copyOnSelect": false,
+    "defaultProfile": "{1d010754-c79d-410a-8c92-5f4054d767fc}",
+    "firstWindowPreference": "persistedWindowLayout",
+    "keybindings": 
+    [
+        {
+            "id": "User.copy.644BA8F2",
+            "keys": "ctrl+c"
+        },
+        {
+            "id": "User.find",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "id": "User.paste",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "User.splitPane.A6751878",
+            "keys": "alt+shift+d"
+        }
+    ],
+    "newTabMenu": 
+    [
+        {
+            "icon": null,
+            "profile": "{1d010754-c79d-410a-8c92-5f4054d767fc}",
+            "type": "profile"
+        },
+        {
+            "icon": null,
+            "profile": "{1c2bac7e-93a8-466c-a0eb-28c57b8ddd6c}",
+            "type": "profile"
+        },
+        {
+            "icon": null,
+            "profile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+            "type": "profile"
+        },
+        {
+            "icon": null,
+            "profile": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+            "type": "profile"
+        }
+    ],
+    "profiles": 
+    {
+        "defaults": 
+        {
+            "antialiasingMode": "cleartype",
+            "backgroundImage": null,
+            "backgroundImageOpacity": 0.1,
+            "backgroundImageStretchMode": "fill",
+            "bellSound": 
+            [
+                "D:\\Download\\Music\\Herta\\VO_JA_Herta_Talent_01.ogg"
+            ],
+            "bellStyle": 
+            [
+                "audible",
+                "window",
+                "taskbar"
+            ],
+            "colorScheme": "Ghost in the Shell",
+            "experimental.retroTerminalEffect": false,
+            "font": 
+            {
+                "face": "MesloLGM Nerd Font",
+                "size": 10
+            },
+            "intenseTextStyle": "all",
+            "opacity": 75,
+            "pathTranslationStyle": "mingw",
+            "showMarksOnScrollbar": true,
+            "useAcrylic": true
+        },
+        "list": 
+        [
+            {
+                "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "hidden": false,
+                "name": "Windows PowerShell"
+            },
+            {
+                "commandline": "%SystemRoot%\\System32\\cmd.exe",
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "hidden": false,
+                "name": "Command Prompt"
+            },
+            {
+                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+                "hidden": false,
+                "name": "Azure Cloud Shell",
+                "source": "Windows.Terminal.Azure"
+            },
+            {
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "hidden": false,
+                "name": "PowerShell",
+                "source": "Windows.Terminal.PowershellCore"
+            },
+            {
+                "guid": "{37f752dd-5baa-5c8f-973e-bd871a462804}",
+                "hidden": false,
+                "name": "Developer Command Prompt for VS 18",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{4b2d6f49-63e9-5785-a5c5-07261186108e}",
+                "hidden": false,
+                "name": "Developer PowerShell for VS 18",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "commandline": "nu.exe",
+                "guid": "{1d010754-c79d-410a-8c92-5f4054d767fc}",
+                "hidden": false,
+                "icon": "%USERPROFILE%\\\\scoop\\\\apps\\\\nu\\\\current\\\\nu.exe",
+                "name": "Nu",
+                "startingDirectory": "%USERPROFILE%",
+                "tabTitle": "Nushell"
+            },
+            {
+                "commandline": "git-bash.exe",
+                "guid": "{1c2bac7e-93a8-466c-a0eb-28c57b8ddd6c}",
+                "hidden": false,
+                "icon": "%USERPROFILE%\\\\scoop\\\\apps\\\\git\\\\current\\\\git-bash.exe",
+                "name": "Git-Bash",
+                "startingDirectory": "%USERPROFILE%",
+                "tabTitle": "Git-Bash"
+            }
+        ]
+    },
+    "schemes": 
+    [
+        {
+            "background": "#0B0B14",
+            "black": "#101116",
+            "blue": "#0271B6",
+            "brightBlack": "#686868",
+            "brightBlue": "#6871FF",
+            "brightCyan": "#60FDFF",
+            "brightGreen": "#5FFA68",
+            "brightPurple": "#BD35EC",
+            "brightRed": "#FF6E67",
+            "brightWhite": "#FFFFFF",
+            "brightYellow": "#FFFC67",
+            "cursorColor": "#76FF9F",
+            "cyan": "#00C5C7",
+            "foreground": "#E41951",
+            "green": "#00DC84",
+            "name": "Ghost in the Shell",
+            "purple": "#CA30C7",
+            "red": "#FF0051",
+            "selectionBackground": "#C1DEFF",
+            "white": "#C7C7C7",
+            "yellow": "#FAF945"
+        },
+        {
+            "background": "#1C153D",
+            "black": "#101116",
+            "blue": "#0271B6",
+            "brightBlack": "#686868",
+            "brightBlue": "#6871FF",
+            "brightCyan": "#60FDFF",
+            "brightGreen": "#5FFA68",
+            "brightPurple": "#BD35EC",
+            "brightRed": "#FF6E67",
+            "brightWhite": "#FFFFFF",
+            "brightYellow": "#FFFC67",
+            "cursorColor": "#76FF9F",
+            "cyan": "#00C5C7",
+            "foreground": "#E41951",
+            "green": "#00DC84",
+            "name": "Scarlet Protocol",
+            "purple": "#CA30C7",
+            "red": "#FF0051",
+            "selectionBackground": "#C1DEFF",
+            "white": "#C7C7C7",
+            "yellow": "#FAF945"
+        }
+    ],
+    "showTabsInTitlebar": true,
+    "showTerminalTitleInTitlebar": false,
+    "tabSwitcherMode": "inOrder",
+    "tabWidthMode": "equal",
+    "theme": "dark",
+    "themes": [],
+    "useAcrylicInTabRow": true,
+    "warning.confirmCloseAllTabs": false,
+    "windowingBehavior": "useNew"
+}
