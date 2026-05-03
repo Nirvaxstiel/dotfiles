@@ -1,0 +1,50 @@
+# Wezterm Config Gitignore
+# ========================
+
+# Wezterm cache and state directories
+# These are typically auto-generated and shouldn't be committed
+.wezterm/
+.wezterm.highlighted/
+.wezterm.layouts/
+.wezterm-maybe-layouts/
+
+# Lua dependencies (if using luarocks)
+luarocks/
+luarocks.bat
+lua.bat
+lua_modules/
+.luarocks/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editor/IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# Temporary files
+*.tmp
+*.temp
+
+# Agent system (AI assistant config - personal)
+.opencode/
+AGENTS.md
+opencode.json
+
+# Build outputs
+*.o
+*.obj
+*.exe
+
+# Log files
+*.log
+config/user.lua

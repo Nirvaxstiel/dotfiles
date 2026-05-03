@@ -1,0 +1,55 @@
+# Git Attributes for Wezterm Config
+# ====================================
+# Ensures consistent line endings across platforms
+
+# Default: auto-detect text files, normalize to LF
+* text=auto
+
+# Force LF for all config files (wezterm uses Lua)
+*.lua          text eol=lf
+*.sh           text eol=lf
+*.md           text eol=lf
+*.yaml         text eol=lf
+*.yml          text eol=lf
+*.json         text eol=lf
+*.toml         text eol=lf
+
+# Shell scripts need to be executable
+*.sh           executable
+
+# Binary files - preserve as-is
+*.png          binary
+*.jpg          binary
+*.jpeg         binary
+*.gif          binary
+*.ico          binary
+*.bmp          binary
+*.svg          binary
+*.pdf          binary
+
+# Archive files
+*.zip          binary
+*.tar          binary
+*.gz           binary
+*.xz           binary
+*.7z           binary
+
+# Font files (if any)
+*.ttf          binary
+*.otf          binary
+*.woff         binary
+*.woff2        binary
+
+# Certs/keys (if added later - keep binary)
+*.pem          binary
+*.key          binary
+*.crt          binary
+*.p12          binary
+*.pfx          binary
+
+# Lua/Luacheck cache
+*.luacheckrc   text
+.luarc.json    text
+
+# GitHub workflows
+.github/       text

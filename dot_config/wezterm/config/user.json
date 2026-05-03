@@ -1,0 +1,34 @@
+{
+  "custom": {
+    "cwd_use_git_root": true,
+    "date_format": "%a %H:%M:%S",
+    "hide_active_tab_unseen": true,
+    "scrollback_lines": 20000,
+    "unseen_icon": "circle"
+  },
+  "features": {
+    "animations": true,
+    "auto-reload": true,
+    "backdrops": true,
+    "background-blur": true,
+    "battery-display": true,
+    "command-palette": true,
+    "cursor-blink": true,
+    "cwd-display": true,
+    "date-display": true,
+    "exit-confirmation": true,
+    "gui-startup": true,
+    "hyperlinks": true,
+    "last-active-tab": true,
+    "left-status": true,
+    "new-tab-button": true,
+    "right-status": true,
+    "scroll-bar": true,
+    "scrollback": true,
+    "tab-bar": true,
+    "tab-index": true,
+    "tab-title": true,
+    "visual-bell": true,
+    "workspace-display": true
+  }
+}
