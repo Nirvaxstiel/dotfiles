@@ -1,0 +1,127 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "properties": {
+            "cache_duration": "none"
+          },
+          "template": "#",
+          "foreground": "lightBlue",
+          "type": "text",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none"
+          },
+          "template": "{{ if .Root }} % {{ end }}",
+          "foreground": "darkGray",
+          "type": "root",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none"
+          },
+          "template": "<cyan>{{ if .SSHSession }}<lightRed>\u2387 </>{{ end }}{{ .UserName }}</><darkGray>@</><green>{{ .HostName }}</>",
+          "type": "session",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none",
+            "display_distro_name": true
+          },
+          "template": " <white>on</> <magenta>{{ if .WSL }}{{ .Icon }}{{ else }}{{ .Icon }}{{ end }}</>",
+          "foreground": "lightMagenta",
+          "type": "os",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none"
+          },
+          "template": "<darkGray> [</><cyan>{{ .Name }}</><darkGray>]</>",
+          "foreground": "lightCyan",
+          "type": "shell",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none",
+            "style": "folder"
+          },
+          "template": "<darkGray> in </><cyan>{{ .Path }}</>",
+          "foreground": "lightYellow",
+          "type": "path",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none",
+            "fetch_status": true
+          },
+          "template": "<darkGray> </><green>git:</><cyan>{{ .HEAD }}</>{{ if .Working.Changed }}<red> ✗</>{{ end }}",
+          "foreground": "lightGreen",
+          "type": "git",
+          "style": "plain"
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "right",
+      "segments": [
+        {
+          "properties": {
+            "cache_duration": "none"
+          },
+          "template": "{{ if .Env.SSH_CLIENT }}{{ .Env.SSH_CLIENT }}{{ end }}",
+          "foreground": "darkGray",
+          "type": "text",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none"
+          },
+          "template": "[{{ .CurrentDate | date .Format }}]",
+          "foreground": "darkGray",
+          "type": "time",
+          "style": "plain"
+        },
+        {
+          "properties": {
+            "cache_duration": "none"
+          },
+          "template": "{{ if gt .Code 0 }}<red>✗{{ .Code }}</>{{ end }}",
+          "foreground": "red",
+          "type": "status",
+          "style": "plain"
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "properties": {
+            "cache_duration": "none"
+          },
+          "template": "$",
+          "foreground": "lightRed",
+          "type": "text",
+          "style": "plain"
+        }
+      ],
+      "newline": true
+    }
+  ],
+  "version": 3,
+  "final_space": true
+}
