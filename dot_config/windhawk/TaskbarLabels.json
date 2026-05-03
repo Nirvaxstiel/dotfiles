@@ -1,0 +1,14 @@
+{
+  "taskbarItemWidth": 0,
+  "minimumTaskbarItemWidth": 0,
+  "maximumTaskbarItemWidth": 100,
+  "runningIndicatorStyle": "centerFixed",
+  "progressIndicatorStyle": "sameAsRunningIndicatorStyle",
+  "fontSize": 11,
+  "leftAndRightPaddingSize": 12,
+  "spaceBetweenIconAndLabel": 14,
+  "labelForSingleItem": "%name%",
+  "labelForMultipleItems": "[%amount%] %name%",
+  "fontFamily": "JetBrainsMono NF",
+  "mode": "noLabelsWithCombining"
+}

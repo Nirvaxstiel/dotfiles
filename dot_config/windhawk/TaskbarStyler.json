@@ -1,0 +1,21 @@
+{
+  "theme": "Matter",
+  "xamlDiagnosticsHandling": "alert",
+  "controlStyles[0].target": "Taskbar.TaskbarFrame#TaskbarFrame > Grid#RootGrid",
+  "controlStyles[1].target": "Windows.UI.Xaml.Controls.Grid#SystemTrayFrameGrid",
+  "controlStyles[1].styles[0]": "Padding=8,0,8,0",
+  "controlStyles[1].styles[1]": "CornerRadius=17",
+  "controlStyles[2].target": "Windows.UI.Xaml.Controls.TextBlock#InnerTextBlock[Text=]",
+  "controlStyles[2].styles[0]": "Text=",
+  "controlStyles[2].styles[1]": "Foreground=#f13a96",
+  "controlStyles[3].target": "Windows.UI.Xaml.Controls.ContentPresenter",
+  "controlStyles[3].styles[0]": "Foreground=#f13a96",
+  "controlStyles[4].target": "SystemTray.IconView#SystemTrayIcon",
+  "controlStyles[4].styles[0]": "Foreground=#f13a96",
+  "controlStyles[6].target": "Taskbar.ExperienceToggleButton#LaunchListButton[AutomationProperties.AutomationId=StartButton] > Taskbar.TaskListButtonPanel > Microsoft.UI.Xaml.Controls.AnimatedVisualPlayer#Icon",
+  "controlStyles[6].styles[0]": "Visibility=Collapsed",
+  "controlStyles[7].target": "Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates > Rectangle#RunningIndicator",
+  "controlStyles[7].styles[0]": "Fill=#09fefd",
+  "controlStyles[7].styles[2]": "Fill@ActiveRunningIndicator=#f13a96",
+  "controlStyles[7].styles[4]": "Fill@RequestingAttentionRunningIndicator=#ff4f42"
+}
