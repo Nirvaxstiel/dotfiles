@@ -148,14 +148,14 @@ def maid-run [target: string, action: string, targets] {
 def maid-clean-all [targets] {
   let to_clean = ($targets | where $it.clean != null)
   if ($to_clean | is-empty) { print "no clean targets"; return }
-  print $"cleaning (($to_clean | length)) target(s)..."
+  print $"cleaning (($to_clean | length)) target\(s\)..."
   $to_clean | each {|t| maid-action $t "clean" }
 }
 
 def maid-prune-all [targets] {
   let to_prune = ($targets | where $it.prune != null)
   if ($to_prune | is-empty) { print "no prune targets"; return }
-  print $"pruning (($to_prune | length)) target(s)..."
+  print $"pruning (($to_prune | length)) target\(s\)..."
   $to_prune | each {|t| maid-action $t "prune" }
 }
 
@@ -170,7 +170,7 @@ def maid-update [target: string, targets] {
 def maid-update-all [targets] {
   let to_update = ($targets | where $it.update != null)
   if ($to_update | is-empty) { print "no targets have update commands"; return }
-  print $"updating (($to_update | length)) target(s)..."
+  print $"updating (($to_update | length)) target\(s\)..."
   $to_update | each {|t|
     maid-action $t "update"
     if ($t.clean != null) { maid-action $t "clean" }
@@ -180,6 +180,6 @@ def maid-update-all [targets] {
 def maid-audit-all [targets] {
   let to_audit = ($targets | where $it.audit != null)
   if ($to_audit | is-empty) { print "no targets have audit commands"; return }
-  print $"auditing (($to_audit | length)) target(s)..."
+  print $"auditing (($to_audit | length)) target\(s\)..."
   $to_audit | each {|t| maid-action $t "audit" }
 }
