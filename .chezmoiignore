@@ -1,0 +1,33 @@
+# Ignore any .git directory (any depth)
+**/.git
+
+# Ignore any history.txt anywhere
+**/history.txt
+
+# Ignore any .history / .log files
+**/*.history
+**/*.log
+
+# Ignore backup & swap files
+**/*~
+**/*.swp
+**/*.bak
+
+# Ignore OS metadata
+**/.DS_Store
+**/Thumbs.db
+
+# Ignore editor/IDE folders
+**/.vscode/
+**/.idea/
+
+# Ignore temporary build folders
+**/dist/
+**/build/
+**/out/
+
+# Ignore any file/directory starting with "tmp"
+**/tmp*
+
+# Ignore Nushell generated files
+**/nushell/generated/
