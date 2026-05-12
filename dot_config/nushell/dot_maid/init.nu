@@ -8,15 +8,8 @@ def get-targets [] {
 }
 
 def maid-action [target: record, action: string] {
-  let action_fn = (match $action {
-    "clean" => $target.clean,
-    "prune" => $target.prune,
-    "update" => $target.update,
-    "audit" => $target.audit,
-    "audit_fix" => $target.audit_fix,
-    _ => null,
-  })
-  if ($action_fn == null) { print $"($target.name): no ($action) command"; return }
+  let action_fn = ($target | get $action)
+  if ($action_fn | is-empty) { print $"($target.name): no ($action) command"; return }
   print $"($target.name): ($action)"
   try {
     do $action_fn | each {|line| print $line }
@@ -54,17 +47,17 @@ def maid [
   if $list {
     print "actions: c (clean)  p (prune)  u (update)  e (audit)  a (clean+prune all)"
     print ""
-    if not ($targets | where $it.clean != null | is-empty) {
+    if not ($targets | where {|$t| $t.clean? | is-not-empty } | is-empty) {
       print "clean targets:"
-      $targets | where $it.clean != null | get name | each {|n| print $"  ($n)"}
+      $targets | where {|$t| $t.clean? | is-not-empty } | get name | each {|n| print $"  ($n)"}
     }
-    if not ($targets | where $it.prune != null | is-empty) {
+    if not ($targets | where {|$t| $t.prune? | is-not-empty } | is-empty) {
       print "prune targets:"
-      $targets | where $it.prune != null | get name | each {|n| print $"  ($n)"}
+      $targets | where {|$t| $t.prune? | is-not-empty } | get name | each {|n| print $"  ($n)"}
     }
-    if not ($targets | where $it.audit != null | is-empty) {
+    if not ($targets | where {|$t| $t.audit? | is-not-empty } | is-empty) {
       print "audit targets:"
-      $targets | where $it.audit != null | get name | each {|n| print $"  ($n)"}
+      $targets | where {|$t| $t.audit? | is-not-empty } | get name | each {|n| print $"  ($n)"}
     }
     return
   }
@@ -146,40 +139,40 @@ def maid-run [target: string, action: string, targets] {
 }
 
 def maid-clean-all [targets] {
-  let to_clean = ($targets | where $it.clean != null)
+  let to_clean = ($targets | where {|$t| $t.clean? | is-not-empty })
   if ($to_clean | is-empty) { print "no clean targets"; return }
-  print $"cleaning (($to_clean | length)) target(s)..."
+  print $"cleaning (($to_clean | length)) target\(s\)..."
   $to_clean | each {|t| maid-action $t "clean" }
 }
 
 def maid-prune-all [targets] {
-  let to_prune = ($targets | where $it.prune != null)
+  let to_prune = ($targets | where {|$t| $t.prune? | is-not-empty })
   if ($to_prune | is-empty) { print "no prune targets"; return }
-  print $"pruning (($to_prune | length)) target(s)..."
+  print $"pruning (($to_prune | length)) target\(s\)..."
   $to_prune | each {|t| maid-action $t "prune" }
 }
 
 def maid-update [target: string, targets] {
   let t = ($targets | where $it.name == $target | first)
   if ($t == null) { print $"unknown target: ($target)"; return }
-  if ($t.update == null) { print $"($t.name): no update command"; return }
+  if not ($t.update? | is-not-empty) { print $"($t.name): no update command"; return }
   maid-action $t "update"
-  if ($t.clean != null) { maid-action $t "clean" }
+  if ($t.clean? | is-not-empty) { maid-action $t "clean" }
 }
 
 def maid-update-all [targets] {
-  let to_update = ($targets | where $it.update != null)
+  let to_update = ($targets | where {|$t| $t.update? | is-not-empty })
   if ($to_update | is-empty) { print "no targets have update commands"; return }
-  print $"updating (($to_update | length)) target(s)..."
+  print $"updating (($to_update | length)) target\(s\)..."
   $to_update | each {|t|
     maid-action $t "update"
-    if ($t.clean != null) { maid-action $t "clean" }
+    if ($t.clean? | is-not-empty) { maid-action $t "clean" }
   }
 }
 
 def maid-audit-all [targets] {
-  let to_audit = ($targets | where $it.audit != null)
+  let to_audit = ($targets | where {|$t| $t.audit? | is-not-empty })
   if ($to_audit | is-empty) { print "no targets have audit commands"; return }
-  print $"auditing (($to_audit | length)) target(s)..."
+  print $"auditing (($to_audit | length)) target\(s\)..."
   $to_audit | each {|t| maid-action $t "audit" }
 }

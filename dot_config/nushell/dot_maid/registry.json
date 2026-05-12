@@ -42,5 +42,13 @@
   {
     "name": "pip",
     "category": "package-manager"
+  },
+  {
+    "name": "docker",
+    "category": "container"
+  },
+  {
+    "name": "hermes",
+    "category": "agent"
   }
 ]
