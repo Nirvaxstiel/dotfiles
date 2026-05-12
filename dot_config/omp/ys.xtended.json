@@ -6,68 +6,54 @@
       "alignment": "left",
       "segments": [
         {
-          "properties": {
-            "cache_duration": "none"
-          },
+          "type": "text",
           "template": "#",
           "foreground": "lightBlue",
-          "type": "text",
           "style": "plain"
         },
         {
-          "properties": {
-            "cache_duration": "none"
-          },
+          "type": "root",
           "template": "{{ if .Root }} % {{ end }}",
           "foreground": "darkGray",
-          "type": "root",
           "style": "plain"
         },
         {
-          "properties": {
-            "cache_duration": "none"
-          },
-          "template": "<cyan>{{ if .SSHSession }}<lightRed>\u2387 </>{{ end }}{{ .UserName }}</><darkGray>@</><green>{{ .HostName }}</>",
           "type": "session",
+          "template": "<cyan>{{ if .SSHSession }}<lightRed>\u2387 </>{{ end }}{{ .UserName }}</><darkGray>@</><green>{{ .HostName }}</>",
+          "foreground": "lightCyan",
           "style": "plain"
         },
         {
-          "properties": {
-            "cache_duration": "none",
+          "type": "os",
+          "options": {
             "display_distro_name": true
           },
           "template": " <white>on</> <magenta>{{ if .WSL }}{{ .Icon }}{{ else }}{{ .Icon }}{{ end }}</>",
           "foreground": "lightMagenta",
-          "type": "os",
           "style": "plain"
         },
         {
-          "properties": {
-            "cache_duration": "none"
-          },
+          "type": "shell",
           "template": "<darkGray> [</><cyan>{{ .Name }}</><darkGray>]</>",
           "foreground": "lightCyan",
-          "type": "shell",
           "style": "plain"
         },
         {
-          "properties": {
-            "cache_duration": "none",
-            "style": "folder"
+          "type": "path",
+          "options": {
+            "style": "full"
           },
           "template": "<darkGray> in </><cyan>{{ .Path }}</>",
           "foreground": "lightYellow",
-          "type": "path",
           "style": "plain"
         },
         {
-          "properties": {
-            "cache_duration": "none",
+          "type": "git",
+          "options": {
             "fetch_status": true
           },
           "template": "<darkGray> </><green>git:</><cyan>{{ .HEAD }}</>{{ if .Working.Changed }}<red> ✗</>{{ end }}",
           "foreground": "lightGreen",
-          "type": "git",
           "style": "plain"
         }
       ]
@@ -77,30 +63,21 @@
       "alignment": "right",
       "segments": [
         {
-          "properties": {
-            "cache_duration": "none"
-          },
+          "type": "text",
           "template": "{{ if .Env.SSH_CLIENT }}{{ .Env.SSH_CLIENT }}{{ end }}",
           "foreground": "darkGray",
-          "type": "text",
           "style": "plain"
         },
         {
-          "properties": {
-            "cache_duration": "none"
-          },
+          "type": "time",
           "template": "[{{ .CurrentDate | date .Format }}]",
           "foreground": "darkGray",
-          "type": "time",
           "style": "plain"
         },
         {
-          "properties": {
-            "cache_duration": "none"
-          },
+          "type": "status",
           "template": "{{ if gt .Code 0 }}<red>✗{{ .Code }}</>{{ end }}",
           "foreground": "red",
-          "type": "status",
           "style": "plain"
         }
       ]
@@ -110,12 +87,9 @@
       "alignment": "left",
       "segments": [
         {
-          "properties": {
-            "cache_duration": "none"
-          },
+          "type": "text",
           "template": "$",
           "foreground": "lightRed",
-          "type": "text",
           "style": "plain"
         }
       ],
