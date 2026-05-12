@@ -1,10 +1,13 @@
-const NU_CONFIG_HOME = $nu.config-path | path dirname
-
-mkdir ($NU_CONFIG_HOME | path join generated)
+mkdir ($nu.data-dir | path join "vendor/autoload")
 zoxide init nushell
-    | save -f ($NU_CONFIG_HOME
-    | path join "generated/.zoxide.nu")
+    | save -f ($nu.data-dir | path join vendor/autoload/zoxide.nu)
 
 oh-my-posh init nu --config ~/.config/omp/ys.xtended.json --print
-    | save -f ($NU_CONFIG_HOME
-    | path join "generated/.oh-my-posh.nu")
+    | save -f ($nu.data-dir | path join vendor/autoload/oh-my-posh.nu)
+
+# starship init nu 
+#     | save -f ($nu.data-dir | path join vendor/autoload/starship.nu)
+
+$env.CARAPACE_BRIDGES = 'zsh,fish,bash,inshellisense'
+mkdir $"($nu.cache-dir)"
+carapace _carapace nushell | save --force $"($nu.cache-dir)/carapace.nu"

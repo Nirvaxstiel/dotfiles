@@ -1,13 +1,11 @@
-$env.config.shell_integration."osc133" = false
-
-const NU_CONFIG_HOME = $nu.config-path | path dirname
-
-source ($NU_CONFIG_HOME | path join "generated/.zoxide.nu")
-source ($NU_CONFIG_HOME | path join "generated/.oh-my-posh.nu")
-
 $env.config.show_banner = false
-
-source ($NU_CONFIG_HOME | path join ".maid" | path join "init.nu")
+$env.config.shell_integration."osc133" = false
+source $"($nu.cache-dir)/carapace.nu"
+source ($nu.data-dir | path join vendor/autoload/zoxide.nu)
+# I prefer oh-my-posh for now.
+source ($nu.data-dir | path join vendor/autoload/oh-my-posh.nu)
+# source ($nu.data-dir | path join vendor/autoload/starship.nu)
+source ($nu.data-dir | path join ".maid/init.nu")
 
 source .common.nu
 source .fastfetch.nu

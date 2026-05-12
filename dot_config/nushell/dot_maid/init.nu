@@ -1,4 +1,4 @@
-const MAID_DIR = ($nu.config-path | path dirname | path join ".maid")
+const MAID_DIR = ($nu.data-dir | path join ".maid")
 source ($MAID_DIR | path join "catalog.nu")
 
 def get-targets [] {
