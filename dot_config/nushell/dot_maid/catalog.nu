@@ -2,7 +2,7 @@ let MAID_CATALOG = [
   {
     name: bun
     category: package-manager
-    detect: "^where bun"
+    detect: {|| which bun }
     clean: {|| bun cache clean --force }
     prune: null
     update: {|| bun upgrade }
@@ -12,7 +12,7 @@ let MAID_CATALOG = [
   {
     name: npm
     category: package-manager
-    detect: "^where npm"
+    detect: {|| which npm }
     clean: {|| npm cache clean --force }
     prune: null
     update: {|| npm update -g }
@@ -22,7 +22,7 @@ let MAID_CATALOG = [
   {
     name: pnpm
     category: package-manager
-    detect: "^where pnpm"
+    detect: {|| which pnpm }
     clean: null
     prune: {|| pnpm store prune }
     update: {|| pnpm up -g }
@@ -32,7 +32,7 @@ let MAID_CATALOG = [
   {
     name: uv
     category: package-manager
-    detect: "^where uv"
+    detect: {|| which uv }
     clean: {|| uv cache clean }
     prune: null
     update: {|| uv self update }
@@ -42,7 +42,7 @@ let MAID_CATALOG = [
   {
     name: scoop
     category: package-manager
-    detect: "^where scoop"
+    detect: {|| which scoop }
     clean: {||
       scoop cache rm -a
       scoop cleanup -a
@@ -58,7 +58,7 @@ let MAID_CATALOG = [
   {
     name: choco
     category: package-manager
-    detect: "^where choco"
+    detect: {|| which choco }
     clean: {|| ^choco cache clear --force }
     prune: null
     update: {|| ^choco upgrade all -y }
@@ -68,7 +68,7 @@ let MAID_CATALOG = [
   {
     name: cargo
     category: toolchain
-    detect: "^where cargo"
+    detect: {|| which cargo }
     clean: {|| cargo cache --autoclean }
     prune: null
     update: {|| cargo install-update -a }
@@ -78,7 +78,7 @@ let MAID_CATALOG = [
   {
     name: dotnet
     category: sdk
-    detect: "^where dotnet"
+    detect: {|| which dotnet }
     clean: {|| ^dotnet nuget locals all --clear }
     prune: null
     update: {|| ^dotnet tool update --all --global }
@@ -88,7 +88,7 @@ let MAID_CATALOG = [
   {
     name: rustup
     category: toolchain
-    detect: "^where rustup"
+    detect: {|| which rustup }
     clean: null
     prune: {|| rustup toolchain prune }
     update: {|| rustup update }
@@ -98,7 +98,7 @@ let MAID_CATALOG = [
   {
     name: gem
     category: package-manager
-    detect: "^where gem"
+    detect: {|| which gem }
     clean: {|| gem cleanup }
     prune: null
     update: {|| gem update --system }
@@ -108,7 +108,7 @@ let MAID_CATALOG = [
   {
     name: pip
     category: package-manager
-    detect: "^where pip"
+    detect: {|| which pip }
     clean: {|| pip cache purge }
     prune: null
     update: {|| python -m pip install --upgrade pip }
@@ -118,7 +118,7 @@ let MAID_CATALOG = [
   {
     name: docker
     category: container
-    detect: "^where docker"
+    detect: {|| which docker }
     clean: {||
       ^docker builder prune -f --filter type!=exec.cachemount
       ^docker image prune -f
@@ -137,8 +137,8 @@ let MAID_CATALOG = [
     name: hermes
     category: agent
     detect: {||
-      let has_docker = (^where docker | is-not-empty)
-      let has_dockerfile = ((^pwd | path expand) | path join "hermes" "Dockerfile" | path exists)
+      let has_docker = (which docker | is-not-empty)
+      let has_dockerfile = (($nu.data-dir | path join "hermes" "Dockerfile") | path exists)
       if $has_docker and $has_dockerfile { "hermes/docker" } else { null }
     }
     clean: {||

@@ -1,9 +1,10 @@
 const MAID_DIR = ($nu.data-dir | path join ".maid")
 source ($MAID_DIR | path join "catalog.nu")
 
+const REGISTRY_FILE = ($MAID_DIR | path join "registry.json")
+
 def get-targets [] {
-  let registry_path = ($MAID_DIR | path join "registry.json")
-  let registered = (try { open $registry_path | each {|r| $r.name} } catch { [] })
+  let registered = (try { open $REGISTRY_FILE | each {|r| $r.name} } catch { [] })
   $MAID_CATALOG | where {|t| $registered | any {|n| $n == $t.name} }
 }
 
@@ -33,7 +34,7 @@ def maid [
   --probe(-r)
   target?: string
 ] {
-  if $probe { maid-probe; return }
+  if $probe { maid-regen; return }
 
   let targets = (get-targets)
 
@@ -45,6 +46,15 @@ def maid [
   }
 
   if $list {
+    let mtime = (try { (ls $REGISTRY_FILE | get 0).modified } catch { null })
+    if $mtime != null {
+      let age = ((date now) - $mtime)
+      if $age > 30day {
+        let msg = $"registry: (($age | date humanize)) old -- may be stale. maid -r to regenerate"
+        print $msg
+      }
+    }
+    print ""
     print "actions: c (clean)  p (prune)  u (update)  e (audit)  a (clean+prune all)"
     print ""
     if not ($targets | where {|$t| $t.clean? | is-not-empty } | is-empty) {
@@ -113,22 +123,22 @@ def maid-help [] {
   print "  maid -e -a           audit all"
   print "  maid -a              clean + prune all"
   print ""
-  print "  maid -r              probe for installed tools"
+  print "  maid -r              regenerate registry"
 }
 
-def maid-probe [] {
+def maid-regen [] {
   print "scanning for installed tools..."
-  let found = ($MAID_CATALOG | where {|t| not ($t.detect | is-empty) })
+  let found = ($MAID_CATALOG | where {|t| not ($t.detect | is-empty) } | where {|t| do $t.detect | is-not-empty })
   if ($found | is-empty) { print "(none found)"; return }
   print ""
   $found | group-by category | items {|cat, tools|
     print $"($cat): (($tools | get name | str join ', '))"
   }
   let count = $found | length
-  print $""
-  print $"($count) tools found. generating registry..."
+  print ""
+  print $"($count) tools found"
   let names = ($found | each {|t| {name: $t.name, category: $t.category} })
-  $names | to json | save -f ($MAID_DIR | path join "registry.json")
+  $names | to json | save -f $REGISTRY_FILE
   print "registry updated."
 }
 
