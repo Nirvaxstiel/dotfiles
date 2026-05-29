@@ -1,0 +1,153 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Inserts a blank line between shell prompts
+add_newline = true
+
+# Wait for commands to complete
+command_timeout = 500
+scan_timeout = 30
+
+# ── Format ────────────────────────────────────────────────────────────────────
+# Block 1 (left):  # [root%] user@host on OS [shell] in /path git:branch [✗]
+# Block 2 (right): SSH_CLIENT [HH:MM:SS] [✗code]
+# Block 3:         $ prompt
+format = '''
+#(bright-blue)$sudo$username$hostname$os$shell$directory$git_branch$git_status
+$character'''
+
+right_format = '''
+$env_var.SSH_CLIENT$time$status$cmd_duration'''
+
+# ── SSH Client (right side) ───────────────────────────────────────────────────
+# OMP: {{ if .Env.SSH_CLIENT }}{{ .Env.SSH_CLIENT }}{{ end }}
+# Use a custom module that only emits when SSH_CLIENT is set
+[custom.ssh_client]
+command = '''if defined($env:SSH_CLIENT) { "$env:SSH_CLIENT" } else { "" }'''
+shell = ['pwsh', '-NoProfile', '-Command', '-']
+detect_files = []
+detect_folders = []
+detect_extensions = []
+when = ''' if (Test-Path env:SSH_CLIENT) { 0 } else { 1 } '''
+format = '[$output](dimmed gray) '
+symbol = ''
+style = 'dimmed gray'
+disabled = false
+
+# ── Root prompt marker ─────────────────────────────────────────────────────────
+# OMP: {{ if .Root }} % {{ end }}
+[sudo]
+disabled = false
+format = '[%](dimmed gray)'
+
+# ── OS ───────────────────────────────────────────────────────────────────────
+# OMP: <white>on</> <magenta>{{ .Icon }}</>
+[os]
+disabled = false
+format = '[ on](dimmed gray) [$symbol](bright-magenta bold) '
+style = 'bold white'
+
+[os.symbols]
+Windows = '󰍾'
+Linux = '🐧'
+Macos = '🍎'
+Ubuntu = '🎯'
+Arch = '🎗️'
+Fedora = '🎩'
+Debian = '🌀'
+Alpine = '🏔️'
+RedHat = '🎩'
+CentOS = '💠'
+Gentoo = '🗜️'
+NixOS = '❄️'
+Void = ''
+EndeavourOS = '🚀'
+Manjaro = '🥭'
+Pop = '🍭'
+Opensuse = '🦎'
+Mint = '🌿'
+
+# ── Username ──────────────────────────────────────────────────────────────────
+# OMP: <cyan>{{ if .SSHSession }}<lightRed>⎇ </>{{ end }}{{ .UserName }}</>
+# Shows user when SSH session, root, or different from login user
+[username]
+style_user = 'bright-cyan bold'
+style_root = 'bright-cyan bold'
+show_always = true
+
+# ── Hostname ──────────────────────────────────────────────────────────────────
+# OMP: <darkGray>@</><green>{{ .HostName }}</>
+[hostname]
+ssh_only = false
+format = '[@](dimmed gray)[$hostname](green bold)'
+
+# ── Shell ─────────────────────────────────────────────────────────────────────
+# OMP: <darkGray>[</><cyan>{{ .Name }}</><darkGray>]</>
+[shell]
+disabled = false
+format = '[ $indicator](bright-cyan)'
+style = 'bright-cyan bold'
+
+# ── Directory ─────────────────────────────────────────────────────────────────
+# OMP: <darkGray> in </><cyan>{{ .Path }}</>
+[directory]
+format = '[ in](dimmed gray) [$path](bright-cyan bold) '
+style = 'bright-cyan bold'
+truncation_length = 3
+
+# ── Git Branch ────────────────────────────────────────────────────────────────
+# OMP: <darkGray> </><green>git:</><cyan>{{ .HEAD }}</>
+[git_branch]
+format = '[ git:](green)[$branch](green bold) '
+symbol = ''
+style = 'green bold'
+
+# ── Git Status ───────────────────────────────────────────────────────────────
+# OMP: {{ if .Working.Changed }}<red> ✗</>{{ end }}
+# Shows modified files indicator
+[git_status]
+format = '[]($style)'
+disabled = false
+modified = ' ✗'
+untracked = ' ?'
+stashed = ' $'
+staged = ' +'
+deleted = ' ✘'
+renamed = ' »'
+conflicted = ' ='
+ahead = ' ⇡'
+behind = ' ⇣'
+style = 'bright-red bold'
+
+# ── Time (right side) ─────────────────────────────────────────────────────────
+# OMP: [{{ .CurrentDate | date .Format }}]  where Format = '%T'
+[time]
+disabled = false
+format = '[$time](dimmed gray)'
+time_format = '%T'
+style = 'dimmed gray'
+
+# ── Status / Exit code (right side) ──────────────────────────────────────────
+# OMP: {{ if gt .Code 0 }}<red>✗{{ .Code }}</>{{ end }}
+[status]
+disabled = false
+format = '[✗](bright-red bold)$status'
+symbol = ''
+success_symbol = ''
+style = 'bright-red bold'
+map_symbol = true
+
+# ── Command Duration (right side) ────────────────────────────────────────────
+[cmd_duration]
+disabled = false
+format = '[took $duration](dimmed gray) '
+style = 'dimmed gray'
+min_time = 2_000
+
+# ── Character / Prompt symbol ─────────────────────────────────────────────────
+# OMP Block 3: <red>$</> as final prompt character
+# This is the final input indicator
+[character]
+success_symbol = '[$](bright-green bold) '
+error_symbol = '[✗](bright-red bold) '
+vimcmd_symbol = '[❮](bright-green bold) '

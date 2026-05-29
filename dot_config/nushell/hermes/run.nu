@@ -1,4 +1,5 @@
 source ../.common.nu
+source ./container.nu
 
 def hermes-dev [
     command?: string
@@ -11,11 +12,13 @@ def hermes-dev [
     --resume (-r): string
     --clone
     --clone-all
+    --podman
 ] {
     let DASHBOARD = "dashboard"
     let host_cwd = pwd | path expand
     let dirname = $host_cwd | path basename
     let slug = (path-slug 4)
+    let engine = get-container-engine --podman
 
     let DATA_VOL = $"-v ($env.USERPROFILE)/.hermes:/opt/data"
     let PROJECT_VOL = $"-v ($host_cwd)/.hermes:/home/user/projects/($dirname)"
@@ -39,7 +42,7 @@ def hermes-dev [
     let chat_fallback = if $profile and $command != "profile" { ["hermes" "-p" $slug "chat"] } else { [] }
     let flags = [...(if $tui { ["--tui"] } else { [] }) ...(if ($resume != null) { ["--resume" $resume] } else { [] })]
 
-    let cmd = ["docker" "run" "--rm" "-it" $DATA_VOL $PROJECT_VOL $WORKDIR ...$dash_ports "hermes-dev" ...$hermes_args ...$chat_fallback ...$flags]
+    let cmd = [$engine "run" "--rm" "-it" $DATA_VOL $PROJECT_VOL $WORKDIR ...$dash_ports "hermes-dev" ...$hermes_args ...$chat_fallback ...$flags]
 
     _run-or-dry-run $cmd $dry_run
 }
@@ -48,9 +51,11 @@ def hermes-panic [
     command?: string
     --fix
     --tui
+    --podman
 ] {
+    let engine = get-container-engine --podman
     let cmd = [
-        "docker" "run" "--rm" "-it"
+        $engine "run" "--rm" "-it"
         "-v" $"($env.USERPROFILE)/.hermes:/opt/data"
         "nousresearch/hermes-agent"
         $command

@@ -29,20 +29,16 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=local \
         aspnetcore-runtime-8.0
 
 # Shit happens. Need writable dirs.
-RUN install -d -o hermes -g hermes /home/user/projects /opt/hermes \
-    && if [ -d /home/user/projects ]; then chown -R hermes:hermes /home/user/projects; fi \
-    && if [ -d /opt/hermes/ui-tui ]; then chown -R hermes:hermes /opt/hermes/ui-tui; fi \
-    && if [ -d /opt/hermes/.venv ]; then chown -R hermes:hermes /opt/hermes/.venv; fi
+# RUN install -d -o hermes -g hermes /home/user/projects /opt/hermes \
+#     && if [ -d /home/user/projects ]; then chown -R hermes:hermes /home/user/projects; fi \
+#     && if [ -d /opt/hermes/ui-tui ]; then chown -R hermes:hermes /opt/hermes/ui-tui; fi \
+#     && if [ -d /opt/hermes/.venv ]; then chown -R hermes:hermes /opt/hermes/.venv; fi
 
 USER hermes
 ENV PATH=/home/hermes/.dotnet/topols:$PATH
 
 RUN --mount=type=cache,target=/home/hermes/.nuget,uid=1000,gid=1000,sharing=locked \
     dotnet tool install --global roslyn-language-server --prerelease
-    # --global csharp-ls
 
-RUN --mount=type=cache,target=/home/hermes/.cache/uv,uid=1000,gid=1000,sharing=locked \
+    RUN --mount=type=cache,target=/home/hermes/.cache/uv,uid=1000,gid=1000,sharing=locked \
     uv tool install graphify && graphify install --platform hermes
-    # uv pip install \
-    #     jcodemunch-mcp
-    #     hermes-agent[web]
