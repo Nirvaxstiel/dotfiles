@@ -1,4 +1,4 @@
-theme = "cyberpunk-scarlet-protocol"
+theme = "ghostintheshell-scarlet-protocol"
 confirm-before-quit = false
 padding-x = 10
 padding-y = [15, 10]
@@ -8,22 +8,24 @@ program = "zed"
 args = []
 
 [cursor]
-shape = 'block'
+shape = 'beam'
+blinking = true
+blinking-interval = 500
 
 [navigation]
 mode = "Tab"
 hide-if-single = false
 
 [window]
-width = 1024
-height = 768
-opacity = 0.9
-opacity-cells = true
+columns = 140
+rows = 60
+# width = 1024
+# height = 768
+opacity = 0.75
 blur = true
-decorations = "disabled"
+decorations = "enabled"
 windows-corner-preference = "Round"
-windows-use-undecorated-shadow = false
-windows-use-no-redirection-bitmap = false
+mode = "Windowed"
 
 [shell]
 program = "nu"
@@ -31,14 +33,15 @@ args = []
 
 [renderer]
 performance = "high"
+target-fps = '120'
+use-cpu = true
+filters = [ "shaders/darken.slangp" ]
 
 [title]
 content = "{{ TITLE || PROGRAM }}"
 
 [fonts]
-# use-drawable-chars = true
-family = "JetBrainsMono Nerd Font"
-features = ["ss02", "ss03", "ss05", "ss19"]
-regular = { style = "Regular", weight = 400 }
-bold = { style = "Bold", weight = 700 }
-italic = { style = "Italic", weight = 400 }
+use-drawable-chars = true
+family = "FiraCode Nerd Font"
+features = ["calt", "liga", "dlig", "ss01", "ss02", "ss03", "ss04", "ss05", "ss06", "ss09"]
+hinting = true

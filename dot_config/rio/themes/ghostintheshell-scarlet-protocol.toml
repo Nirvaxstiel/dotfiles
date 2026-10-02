@@ -1,0 +1,59 @@
+# Ghost in the Shell — Scarlet Protocol
+
+[colors]
+background = "#0a0e14"
+foreground = "#b3e5fc"
+
+# Navigation
+cursor = "#ff335f"
+vi-cursor = "#00d4aa"
+tabs = "#4a5f6d"
+tabs-active = "#ff335f"
+bar = "#0a0e14"
+split = "#1a2332"
+
+# Search
+search-match-background = "#00d4aa55"
+search-match-foreground = "#e1f5fe"
+search-focused-match-background = "#ff335f66"
+search-focused-match-foreground = "#e1f5fe"
+
+# Hints
+hint-foreground = "#0a0e14"
+hint-background = "#ff335f"
+
+# Selection
+selection-foreground = "#e1f5fe"
+selection-background = "#ff335f55"
+
+# Regular colors
+black = "#0a0e14"
+red = "#ff335f"
+green = "#00e6a0"
+yellow = "#ffa726"
+blue = "#26c6da"
+magenta = "#ab47bc"
+cyan = "#00d4aa"
+white = "#b3e5fc"
+
+# Dim colors
+dim-black = "#151922"
+dim-red = "#b51f43"
+dim-green = "#008f68"
+dim-yellow = "#b87823"
+dim-blue = "#1a8298"
+dim-magenta = "#70409b"
+dim-cyan = "#008f83"
+dim-white = "#4a5f6d"
+dim-foreground = "#6b8e9e"
+
+# Light colors
+light-black = "#4a5f6d"
+light-red = "#ff5c7f"
+light-green = "#2fffc0"
+light-yellow = "#ffb84d"
+light-blue = "#4dd0e1"
+light-magenta = "#ce93d8"
+light-cyan = "#47f0df"
+light-white = "#e1f5fe"
+light-foreground = "#d9f5ff"

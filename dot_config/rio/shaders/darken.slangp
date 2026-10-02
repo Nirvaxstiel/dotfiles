@@ -1,0 +1,10 @@
+shaders = 1
+shader0 = "shaders/darken.glsl"
+
+brightness = -0.20
+contrast = 1.05
+saturation = 1.0
+
+[brightness_contrast]
+brightness = -0.15
+contrast = 1.10

@@ -1,0 +1,59 @@
+# Ghost in the Shell — Cyan Protocol
+
+[colors]
+background = "#0a0e14"
+foreground = "#b3e5fc"
+
+# Navigation
+cursor = "#00ff9f"
+vi-cursor = "#26c6da"
+tabs = "#4a5f6d"
+tabs-active = "#00ff9f"
+bar = "#0a0e14"
+split = "#1a2332"
+
+# Search
+search-match-background = "#26c6da55"
+search-match-foreground = "#e1f5fe"
+search-focused-match-background = "#00ff9f66"
+search-focused-match-foreground = "#0a0e14"
+
+# Hints
+hint-foreground = "#0a0e14"
+hint-background = "#00ff9f"
+
+# Selection
+selection-foreground = "#0a0e14"
+selection-background = "#00d4aa66"
+
+# Regular colors
+black = "#0a0e14"
+red = "#ff0066"
+green = "#00ff9f"
+yellow = "#ffa726"
+blue = "#26c6da"
+magenta = "#ab47bc"
+cyan = "#00d4aa"
+white = "#b3e5fc"
+
+# Dim colors
+dim-black = "#151922"
+dim-red = "#b30049"
+dim-green = "#00a66f"
+dim-yellow = "#b87823"
+dim-blue = "#1a8298"
+dim-magenta = "#70409b"
+dim-cyan = "#008f83"
+dim-white = "#4a5f6d"
+dim-foreground = "#6b8e9e"
+
+# Light colors
+light-black = "#4a5f6d"
+light-red = "#ff3385"
+light-green = "#33ffb8"
+light-yellow = "#ffb84d"
+light-blue = "#4dd0e1"
+light-magenta = "#ce93d8"
+light-cyan = "#80deea"
+light-white = "#e1f5fe"
+light-foreground = "#d9f5ff"
