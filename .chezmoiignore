@@ -31,3 +31,15 @@
 
 # Ignore Nushell generated files
 **/nushell/generated/
+# Ignore rio's generated runtime files
+**/rio/log
+**/rio/shell-integration-*
+# Windows-only trees: AppData has no meaning on other systems
+{{ if ne .chezmoi.os "windows" }}
+AppData/**
+{{ end }}
+# Ignore herdr's runtime files
+**/herdr/*.sock
+**/herdr/*.log
+**/herdr/agent-detection/
+**/herdr/sessions/
