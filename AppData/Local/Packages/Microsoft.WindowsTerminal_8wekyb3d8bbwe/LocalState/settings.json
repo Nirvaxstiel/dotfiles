@@ -16,10 +16,6 @@
             "id": "User.paste"
         },
         {
-            "command": "find",
-            "id": "User.find"
-        },
-        {
             "command": 
             {
                 "action": "splitPane",
@@ -27,6 +23,10 @@
                 "splitMode": "duplicate"
             },
             "id": "User.splitPane.A6751878"
+        },
+        {
+            "command": "find",
+            "id": "User.find"
         }
     ],
     "alwaysShowNotificationIcon": false,
@@ -41,16 +41,24 @@
             "keys": "ctrl+c"
         },
         {
-            "id": "User.find",
-            "keys": "ctrl+shift+f"
+            "id": "Terminal.ToggleCommandPalette",
+            "keys": "f2"
         },
         {
             "id": "User.paste",
             "keys": "ctrl+v"
         },
         {
+            "id": "User.find",
+            "keys": "ctrl+shift+f"
+        },
+        {
             "id": "User.splitPane.A6751878",
             "keys": "alt+shift+d"
+        },
+        {
+            "id": null,
+            "keys": "ctrl+shift+p"
         }
     ],
     "newTabMenu": 
@@ -162,6 +170,12 @@
                 "name": "Git-Bash",
                 "startingDirectory": "%USERPROFILE%",
                 "tabTitle": "Git-Bash"
+            },
+            {
+                "guid": "{37b40a28-4934-5add-84b2-ed6a6f5da21e}",
+                "hidden": false,
+                "name": "Ubuntu-24.04",
+                "source": "Microsoft.WSL"
             }
         ]
     },
@@ -214,6 +228,7 @@
             "yellow": "#FAF945"
         }
     ],
+    "searchWebDefaultQueryUrl": "https://www.startpage.com/search?q=%22%s%22",
     "showTabsInTitlebar": true,
     "showTerminalTitleInTitlebar": false,
     "tabSwitcherMode": "inOrder",
