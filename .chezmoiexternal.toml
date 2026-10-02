@@ -1,0 +1,13 @@
+{{- $nushellTarget := ".config/nushell" -}}
+{{- if eq .chezmoi.os "windows" -}}
+{{- $nushellTarget = "AppData/Roaming/nushell" -}}
+{{- end -}}
+["{{ $nushellTarget }}"]
+    type = "git-repo"
+    url = "https://github.com/Nirvaxstiel/nushell-configs.git"
+    refreshPeriod = "168h"
+
+[".config/wezterm"]
+    type = "git-repo"
+    url = "https://github.com/Nirvaxstiel/wezterm-ghost-in-the-shell.git"
+    refreshPeriod = "168h"
