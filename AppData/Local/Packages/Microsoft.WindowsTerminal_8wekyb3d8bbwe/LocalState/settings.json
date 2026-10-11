@@ -1,10 +1,10 @@
 {
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
-    "actions": 
+    "actions":
     [
         {
-            "command": 
+            "command":
             {
                 "action": "copy",
                 "singleLine": false
@@ -16,52 +16,52 @@
             "id": "User.paste"
         },
         {
-            "command": 
+            "command": "find",
+            "id": "User.find"
+        },
+        {
+            "command":
             {
                 "action": "splitPane",
                 "split": "auto",
                 "splitMode": "duplicate"
             },
             "id": "User.splitPane.A6751878"
-        },
-        {
-            "command": "find",
-            "id": "User.find"
         }
     ],
     "alwaysShowNotificationIcon": false,
     "copyFormatting": "none",
     "copyOnSelect": false,
     "defaultProfile": "{1d010754-c79d-410a-8c92-5f4054d767fc}",
-    "firstWindowPreference": "persistedWindowLayout",
-    "keybindings": 
+    "firstWindowPreference": "persistedLayoutAndContent",
+    "keybindings":
     [
-        {
-            "id": "User.copy.644BA8F2",
-            "keys": "ctrl+c"
-        },
         {
             "id": "Terminal.ToggleCommandPalette",
             "keys": "f2"
         },
         {
-            "id": "User.paste",
-            "keys": "ctrl+v"
+            "id": "User.copy.644BA8F2",
+            "keys": "ctrl+c"
         },
         {
             "id": "User.find",
             "keys": "ctrl+shift+f"
         },
         {
-            "id": "User.splitPane.A6751878",
-            "keys": "alt+shift+d"
+            "id": "User.paste",
+            "keys": "ctrl+v"
         },
         {
             "id": null,
             "keys": "ctrl+shift+p"
+        },
+        {
+            "id": "User.splitPane.A6751878",
+            "keys": "alt+shift+d"
         }
     ],
-    "newTabMenu": 
+    "newTabMenu":
     [
         {
             "icon": null,
@@ -84,19 +84,19 @@
             "type": "profile"
         }
     ],
-    "profiles": 
+    "profiles":
     {
-        "defaults": 
+        "defaults":
         {
             "antialiasingMode": "cleartype",
             "backgroundImage": null,
             "backgroundImageOpacity": 0.1,
             "backgroundImageStretchMode": "fill",
-            "bellSound": 
+            "bellSound":
             [
                 "D:\\Download\\Music\\Herta\\VO_JA_Herta_Talent_01.ogg"
             ],
-            "bellStyle": 
+            "bellStyle":
             [
                 "audible",
                 "window",
@@ -104,7 +104,7 @@
             ],
             "colorScheme": "Ghost in the Shell",
             "experimental.retroTerminalEffect": false,
-            "font": 
+            "font":
             {
                 "face": "MesloLGM Nerd Font",
                 "size": 10
@@ -115,7 +115,7 @@
             "showMarksOnScrollbar": true,
             "useAcrylic": true
         },
-        "list": 
+        "list":
         [
             {
                 "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
@@ -179,7 +179,7 @@
             }
         ]
     },
-    "schemes": 
+    "schemes":
     [
         {
             "background": "#0B0B14",
