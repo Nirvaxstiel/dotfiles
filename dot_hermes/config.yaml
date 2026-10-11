@@ -34,7 +34,7 @@ agent:
     teacher: You are a patient teacher. Explain concepts clearly with examples.
     technical: You are a technical expert. Provide detailed, accurate technical information.
     uwu: hewwo! i'm your fwiendwy assistant uwu~ i wiww twy my best to hewp you! *nuzzles your code* OwO what's this? wet me take a wook! i pwomise to be vewy hewpful >w<
-  reasoning_effort: max
+  reasoning_effort: medium
   verbose: false
 terminal:
   backend: local
@@ -270,6 +270,8 @@ display:
   sections:
     thinking: expanded
   message_reactions: false
+  in_app_tips: false
+  in_app_tours: false
 dashboard:
   theme: cyberpunk
   show_token_analytics: false
@@ -351,7 +353,7 @@ memory:
   memory_char_limit: 2200
   user_char_limit: 1375
   nudge_interval: 10
-  provider: mnemosyne
+  provider: ''
   flush_min_turns: 6
 delegation:
   model: 'openai/gpt-6-luna'
@@ -507,6 +509,7 @@ plugins:
   enabled:
     - disk-cleanup
     - herdr-agent-state
+    - hermes-session-reset-policy
     - jev-approvals
     - jev-curator
     - jev-skill-router
@@ -528,10 +531,6 @@ hooks_auto_accept: false
 security:
   allow_private_urls: false
   redact_secrets: true
-  tirith_enabled: true
-  tirith_path: tirith
-  tirith_timeout: 5
-  tirith_fail_open: true
   website_blocklist:
     enabled: false
     domains: []
@@ -633,16 +632,20 @@ paste_collapse_threshold_fallback: 5
 paste_collapse_char_threshold: 2000
 local_runtime:
   enabled: false
-_config_version: 49
+_config_version: 50
 group_sessions_per_user: true
 known_plugin_toolsets:
   cli:
     - a2a
-    - memory
+    - homeassistant
     - mnemosyne-dashboard
     - nerve
     - skills
     - spotify
+  acp:
+    - homeassistant
+  webhook:
+    - homeassistant
 mcp_servers:
   jcodemunch:
     args:
@@ -660,10 +663,8 @@ platform_toolsets:
     - file
     - kanban
     - memory
-    - mnemosyne-dashboard
     - moa
     - nerve
-    - session_search
     - skills
     - terminal
     - todo
@@ -695,9 +696,9 @@ session_reset:
   idle_minutes: 1440
   mode: both
 model:
-  default: upstage/solar-pro4:free
-  provider: nous
-  base_url: https://inference-api.nousresearch.com/v1
+  default: deepseek/deepseek-v4.1-flash
+  provider: openrouter
+  base_url: https://openrouter.ai/api/v1
   api_mode: chat_completions
 known_builtin_toolsets:
   cli:
@@ -738,3 +739,13 @@ telemetry:
   shared_metrics:
     enabled: false
     send: false
+    offer_version: 2
+_left_core_scoped:
+  - homeassistant
+_left_core_installed:
+  - homeassistant
+update:
+  installs:
+    193afa580825e750:
+      path: C:\Users\Kei\.hermes\hermes-agent
+      channel: main
