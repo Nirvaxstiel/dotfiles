@@ -34,9 +34,10 @@
 # Ignore rio's generated runtime files
 **/rio/log
 **/rio/shell-integration-*
-# Windows-only trees: AppData has no meaning on other systems
+# Windows-only trees: these have no meaning on other systems
 {{ if ne .chezmoi.os "windows" }}
 AppData/**
+.config/windhawk/**
 {{ end }}
 # Ignore herdr's runtime files
 **/herdr/*.sock
