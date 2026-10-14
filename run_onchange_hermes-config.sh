@@ -37,11 +37,6 @@ hermes config set web.backend 'exa'
 hermes config set checkpoints.delete_orphans true
 hermes config set mcp_servers.jcodemunch.args '["--from", "git+https://github.com/jgravelle/jcodemunch-mcp.git", "jcodemunch-mcp"]'
 hermes config set mcp_servers.jcodemunch.command 'uvx'
-hermes config set mcp_servers.rea.args '["C:\\Users\\Kei\\AppData\\Local\\npm-cache\\_npx\\9b9809298fe40d2c\\node_modules\\rea-agents\\scripts\\rea.mjs", "mcp"]'
-hermes config set mcp_servers.rea.command 'C:\Users\Kei\.hermes\node\node.exe'
-hermes config set mcp_servers.rea.enabled true
-hermes config set plugins.disabled '[]'
-hermes config set plugins.enabled '["disk-cleanup", "herdr-agent-state", "hermes-session-reset-policy", "jev-approvals", "jev-curator", "jev-skill-router", "mnemosyne", "mnemosyne-dashboard", "nerve", "security-guidance"]'
 hermes config set plugins.entries.jev-curator.settings.allow_content_egress true
 hermes config set plugins.entries.jev-curator.settings.mode 'observe'
 hermes config set plugins.entries.jev-curator.settings.provider 'openrouter'
@@ -52,6 +47,23 @@ hermes config set sessions.write_json_snapshots false
 # tracked as files, so `hermes skills update` and `hermes plugins update` keep
 # them current. The skills this repo actually wrote live in dot_hermes/skills
 # and the skin in dot_hermes/skins; those are plain files and need no command.
+
+# `plugins install` exits non-zero with "already exists. Use force reinstall"
+# when the plugin is present, which would abort this script under `set -e`.
+# Already installed is the state we want, so only that message is tolerated;
+# anything else still fails loudly. `--force` is deliberately absent because it
+# would discard local plugin edits on every apply.
+install_plugin() {
+  local out
+  if out=$(hermes plugins install "$1" --yes-deps --enable 2>&1); then
+    return 0
+  fi
+  case "$out" in
+    *"already exists"* | *"already installed"*) return 0 ;;
+  esac
+  printf '%s\n' "$out" >&2
+  return 1
+}
 
 hermes skills install constraint-driven-development --yes
 hermes skills install context-engineering --yes
@@ -67,10 +79,10 @@ hermes skills install ast-grep --yes
 hermes skills install grill-me --yes
 hermes skills install subagent-driven-development --yes
 
-hermes plugins install mnemosyne --yes-deps --enable
-hermes plugins install jev-approvals --yes-deps --enable
-hermes plugins install jev-curator --yes-deps --enable
-hermes plugins install jev-skill-router --yes-deps --enable
-hermes plugins install fastfinge/hermes-session-reset-policy --yes-deps --enable
-hermes plugins install wysie/mnemosyne-dashboard --yes-deps --enable
-hermes plugins install keeltrace/hermes-nerve --yes-deps --enable
+install_plugin mnemosyne
+install_plugin jev-approvals
+install_plugin jev-curator
+install_plugin jev-skill-router
+install_plugin fastfinge/hermes-session-reset-policy
+install_plugin wysie/mnemosyne-dashboard
+install_plugin keeltrace/hermes-nerve
