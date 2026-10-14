@@ -47,3 +47,30 @@ hermes config set plugins.entries.jev-curator.settings.mode 'observe'
 hermes config set plugins.entries.jev-curator.settings.provider 'openrouter'
 hermes config set plugins.entries.jev-skill-router.settings.mode true
 hermes config set sessions.write_json_snapshots false
+
+# Skills and plugins from Hermes' own registries are installed here rather than
+# tracked as files, so `hermes skills update` and `hermes plugins update` keep
+# them current. The skills this repo actually wrote live in dot_hermes/skills
+# and the skin in dot_hermes/skins; those are plain files and need no command.
+
+hermes skills install constraint-driven-development --yes
+hermes skills install context-engineering --yes
+hermes skills install database-migration --yes
+hermes skills install observability-and-instrumentation --yes
+hermes skills install openapi-specification-v3.2 --yes
+hermes skills install performance-optimization --yes
+hermes skills install reverse-engineer-anything --yes
+hermes skills install simple-english --yes
+hermes skills install docker-management --yes
+hermes skills install fastmcp --yes
+hermes skills install ast-grep --yes
+hermes skills install grill-me --yes
+hermes skills install subagent-driven-development --yes
+
+hermes plugins install mnemosyne --yes-deps --enable
+hermes plugins install jev-approvals --yes-deps --enable
+hermes plugins install jev-curator --yes-deps --enable
+hermes plugins install jev-skill-router --yes-deps --enable
+hermes plugins install fastfinge/hermes-session-reset-policy --yes-deps --enable
+hermes plugins install wysie/mnemosyne-dashboard --yes-deps --enable
+hermes plugins install keeltrace/hermes-nerve --yes-deps --enable

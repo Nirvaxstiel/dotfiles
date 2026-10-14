@@ -1,0 +1,28 @@
+// Local niri settings. The seed adds one include line for this file to the
+// config that niri's own version ships, so every value here overrides the stock
+// value. Only the settings that differ from the stock config belong here.
+// Full option reference: https://yalter.github.io/niri/Configuration:-Introduction
+
+output "DP-1" {
+    mode "3440x1440@164.900"
+    scale 1
+    transform "normal"
+    position x=3440 y=-180
+}
+
+output "DP-2" {
+    mode "1920x1080@144.001"
+    scale 1
+    transform "normal"
+    position x=0 y=0
+}
+
+binds {
+    Mod+T hotkey-overlay-title="Open a Terminal" { spawn "ghostty"; }
+    Mod+D hotkey-overlay-title="Launcher: Noctalia" { spawn-sh "noctalia msg panel-toggle launcher"; }
+    Mod+Space hotkey-overlay-title="Launcher: Noctalia" { spawn-sh "noctalia msg panel-toggle launcher"; }
+    Mod+S hotkey-overlay-title="Control Center: Noctalia" { spawn-sh "noctalia msg panel-toggle control-center"; }
+    Mod+Shift+S hotkey-overlay-title="Noctalia Settings" { spawn-sh "noctalia msg settings-toggle"; }
+    Alt+Tab hotkey-overlay-title="Window Switcher: Noctalia" { spawn-sh "noctalia msg window-switcher"; }
+    Super+Alt+L hotkey-overlay-title="Lock the Screen: Noctalia" { spawn-sh "noctalia msg session lock"; }
+}

@@ -1,0 +1,15 @@
+{
+  "_meta": {
+    "source": "Human-readable source description (e.g. AA chart images dated 3 Jul '26)",
+    "extraction": "How values were obtained (vision-transcribed / scraped / API)",
+    "encoding_note": "Keyed by canonical id (or chart display name + resolver in _canonical.py). Nullable; omit keys a model lacks.",
+    "excluded_charts": [
+      "List charts/scalars deliberately NOT encoded and why (owned elsewhere / non-scalar / vision-failed)"
+    ]
+  },
+  "display-or-canonical-name": {
+    "metric_a": 40,
+    "metric_b": 61,
+    "extra_b": 117
+  }
+}

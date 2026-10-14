@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DASHBOARD // RESEARCH ARTIFACT</title>
+<!--
+  Cyber-Brutalism Dashboard Template
+  ----------------------------------
+  One-file, zero-dep research artifact. Loads sibling JSON via fetch.
+  Open via `python -m http.server 8000` then http://localhost:8000/dashboard.html
+  
+  Required:
+    - data/<dataset>.json — array of objects OR object keyed by slug
+  
+  Data fields expected (rename in normalizeData() if your data differs):
+    - name, creator
+    - intel (numeric 0-100)
+    - cost_per_task (USD, $0.02-$3 typical for AI benchmarks)
+    - tokens_m (output tokens in millions)
+-->
+<style>
+:root {
+  --bg: #0a0a0a;
+  --fg: #f5f5f0;
+  --muted: #888;
+  --border: #f5f5f0;
+  --neon: #b6ff3c;
+  --neon2: #00e5ff;
+  --warn: #ff3366;
+  --panel: #111;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--fg); }
+body {
+  font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', monospace;
+  line-height: 1.5;
+  padding: 48px 32px;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.wrap { max-width: 1280px; margin: 0 auto; }
+
+header { border: 3px solid var(--border); padding: 24px 32px; margin-bottom: 32px;
+  box-shadow: 8px 8px 0 var(--neon); background: var(--panel); }
+header h1 { font-size: 32px; letter-spacing: -0.02em; font-weight: 800; }
+header h1 span { color: var(--neon); }
+header .meta { color: var(--muted); font-size: 12px; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.1em; }
+
+.section { margin-bottom: 48px; }
+.marker { display: flex; align-items: baseline; gap: 16px; margin-bottom: 16px; }
+.marker .num { color: var(--neon); font-weight: 800; font-size: 14px; }
+.marker h2 { font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+.marker .tag { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+
+.card { border: 3px solid var(--border); background: var(--panel); padding: 24px;
+  box-shadow: 6px 6px 0 var(--neon2); }
+.card.warn { box-shadow: 6px 6px 0 var(--warn); }
+.card h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; color: var(--muted); }
+.card .big { font-size: 36px; font-weight: 800; line-height: 1; }
+.card .big span { color: var(--neon); }
+
+.chart { border: 3px solid var(--border); background: var(--panel);
+  box-shadow: 8px 8px 0 var(--neon); padding: 24px; margin-bottom: 32px; }
+.chart-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+.chart-head h2 { font-size: 18px; font-weight: 800; text-transform: uppercase; }
+.chart-head .src { color: var(--muted); font-size: 11px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 16px;
+  padding-top: 16px; border-top: 1px dashed var(--muted); font-size: 11px; }
+.legend .item { display: flex; align-items: center; gap: 6px; }
+.legend .dot { width: 10px; height: 10px; display: inline-block; border: 1px solid var(--fg); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+@media (max-width: 900px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #333; }
+th { color: var(--neon); text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;
+  border-bottom: 2px solid var(--neon); }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+tr:hover td { background: rgba(182,255,60,0.05); }
+
+svg { display: block; max-width: 100%; height: auto; }
+svg .axis text { fill: var(--muted); font-family: inherit; font-size: 10px; }
+svg .axis line, svg .axis path { stroke: #444; }
+svg .grid line { stroke: #1a1a1a; stroke-dasharray: 2 4; }
+svg .point { cursor: crosshair; }
+svg .point:hover { stroke: var(--fg); stroke-width: 2; }
+
+.comment { color: var(--muted); font-style: italic; padding: 12px 16px;
+  border-left: 3px solid var(--neon2); margin: 16px 0; font-size: 13px; }
+.comment::before { content: "// "; color: var(--neon2); font-style: normal; }
+
+footer { margin-top: 64px; padding-top: 24px; border-top: 1px dashed var(--muted);
+  color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
+
+.strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 3px solid var(--border);
+  margin-bottom: 32px; box-shadow: 6px 6px 0 var(--neon); }
+.strip > div { padding: 20px; border-right: 1px solid var(--border); background: var(--panel); }
+.strip > div:last-child { border-right: 0; }
+.strip .label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; }
+.strip .val { font-size: 28px; font-weight: 800; line-height: 1; margin-top: 8px; }
+.strip .val span { color: var(--neon); }
+@media (max-width: 700px) { .strip { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>RESEARCH<span>//</span>TOPIC DASHBOARD</h1>
+  <div class="meta">SOURCE: YOUR DATA · DATE · N MODELS</div>
+</header>
+
+<div class="strip">
+  <div><div class="label">CHAMPION</div><div class="val">Top <span>Model</span></div></div>
+  <div><div class="label">CHEAPEST</div><div class="val">Bottom <span>$</span></div></div>
+  <div><div class="label">SWEET SPOT</div><div class="val">Best <span>Ratio</span></div></div>
+  <div><div class="label">HEADLINE</div><div class="val">Your <span>Insight</span></div></div>
+</div>
+
+<div class="section">
+  <div class="marker">
+    <span class="num">01 //</span>
+    <h2>The Crossover</h2>
+    <span class="tag">x = cost · y = score · bubble = tokens</span>
+  </div>
+  <div class="chart">
+    <div class="chart-head">
+      <h2>your-chart-name</h2>
+      <span class="src">// green quadrant = best</span>
+    </div>
+    <svg viewBox="0 0 1100 600" id="bubble"></svg>
+    <div class="legend" id="legend"></div>
+  </div>
+  <div class="comment">
+    Describe the most surprising finding in 2-3 sentences. The comment block IS the insight — not a description of the chart.
+  </div>
+</div>
+
+<div class="section">
+  <div class="marker">
+    <span class="num">02 //</span>
+    <h2>Top Pick (by your metric)</h2>
+    <span class="tag">ranked</span>
+  </div>
+  <div class="chart" style="box-shadow: 8px 8px 0 var(--neon2);">
+    <table id="ranked">
+      <thead><tr><th>RANK</th><th>NAME</th><th>GROUP</th><th class="num">SCORE</th><th class="num">VALUE</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  // DATA: N MODELS · SOURCE: YOUR ATTRIBUTION · METHODOLOGY: ONE-LINE
+</footer>
+
+</div>
+
+<script>
+// ============================================================
+// PALETTE — color by category (creator, model family, region, etc.)
+// ============================================================
+const COLORS = {
+  "category-a": "#b6ff3c",
+  "category-b": "#00e5ff",
+  "category-c": "#ff3366",
+  "category-d": "#f5f5f0",
+  "category-e": "#a855f7"
+};
+
+async function loadData() {
+  // Adjust URL to your JSON file
+  const raw = await fetch('./data/your-data.json').then(r => r.json());
+
+  // Normalize: handle both array and object-keyed JSON
+  const list = Array.isArray(raw) ? raw : Object.values(raw);
+
+  // CRITICAL: rename fields to match what renderers expect
+  return list.map(m => ({
+    ...m,
+    cost_per_task: m.cost_per_task ?? m.cost ?? null,
+    intel: m.intel ?? m.intelligence_index ?? m.score ?? null,
+    tokens_m: m.tokens_m ?? m.total_tokens ?? null
+  }));
+}
+
+// ============================================================
+// RENDER 01: Bubble chart (x=cost, y=score, bubble=tokens)
+// ============================================================
+function renderBubble(data) {
+  const W = 1100, H = 600;
+  const M = { top: 30, right: 30, bottom: 50, left: 60 };
+  const innerW = W - M.left - M.right;
+  const innerH = H - M.top - M.bottom;
+
+  // Filter to rows with all three required fields
+  const pts = data.filter(m => m.cost_per_task > 0 && m.intel != null && m.tokens_m != null);
+  console.log(`Bubble: rendering ${pts.length} of ${data.length} points`);  // sanity check
+
+  if (pts.length === 0) {
+    document.getElementById('bubble').innerHTML =
+      `<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#ff3366" font-family="monospace">// NO DATA — check field names in loadData()</text>`;
+    return;
+  }
+
+  // Scales — adjust ranges to your data domain
+  const minC = 0.02, maxC = 3.0;  // cost per task (log scale)
+  const minS = 10, maxS = 80;      // score (linear)
+  const minT = 30, maxT = 320;     // tokens (sqrt for area)
+
+  const xScale = c => M.left + (Math.log10(c) - Math.log10(minC)) / (Math.log10(maxC) - Math.log10(minC)) * innerW;
+  const yScale = s => M.top + (1 - (s - minS) / (maxS - minS)) * innerH;
+  const rScale = t => 4 + Math.sqrt((t - minT) / (maxT - minT)) * 22;  // SQRT for area
+
+  // Build SVG
+  let svg = '';
+
+  // "Most attractive quadrant" background hint
+  svg += `<rect x="${xScale(minC)}" y="${M.top}" width="${xScale(0.5) - xScale(minC)}" height="${yScale(50) - M.top}" fill="rgba(182,255,60,0.05)" stroke="rgba(182,255,60,0.3)" stroke-dasharray="3 3"/>`;
+  svg += `<text x="${xScale(0.04)}" y="${M.top + 16}" fill="#b6ff3c" font-size="10" font-family="monospace">// GREEN QUADRANT: high score + low cost</text>`;
+
+  // Grid + axes (customize tick values to your data)
+  const cTicks = [0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 3];
+  const sTicks = [10, 20, 30, 40, 50, 60, 70, 80];
+  for (const t of cTicks) svg += `<line class="grid" x1="${xScale(t)}" y1="${M.top}" x2="${xScale(t)}" y2="${H - M.bottom}"/>`;
+  for (const t of sTicks) svg += `<line class="grid" x1="${M.left}" y1="${yScale(t)}" x2="${W - M.right}" y2="${yScale(t)}"/>`;
+
+  svg += `<g class="axis">`;
+  for (const t of cTicks) svg += `<text x="${xScale(t)}" y="${H - M.bottom + 18}" text-anchor="middle">$${t}</text>`;
+  for (const t of sTicks) svg += `<text x="${M.left - 8}" y="${yScale(t) + 3}" text-anchor="end">${t}</text>`;
+  svg += `<text x="${W/2}" y="${H - 8}" text-anchor="middle" font-weight="800" font-size="12">COST (USD, log)</text>`;
+  svg += `<text x="14" y="${H/2}" text-anchor="middle" font-weight="800" font-size="12" transform="rotate(-90 14 ${H/2})">SCORE</text>`;
+  svg += `</g>`;
+
+  // Points — use <title> for native hover tooltips
+  for (const m of pts) {
+    const cx = xScale(m.cost_per_task);
+    const cy = yScale(m.intel);
+    const r = rScale(m.tokens_m);
+    const fill = COLORS[m.creator] || "#888";
+    const tip = `${m.name} (${m.creator})\nScore: ${m.intel} · Cost: $${m.cost_per_task.toFixed(2)} · ${m.tokens_m}M tokens`;
+    svg += `<circle class="point" cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" fill-opacity="0.7" stroke="#000" stroke-width="1.5"><title>${tip}</title></circle>`;
+  }
+
+  document.getElementById('bubble').innerHTML = svg;
+
+  // Legend
+  const cats = [...new Set(pts.map(p => p.creator))].sort();
+  let leg = '<strong>CREATOR</strong> ';
+  for (const c of cats) {
+    const color = COLORS[c] || "#888";
+    leg += `<span class="item"><span class="dot" style="background:${color}"></span>${c}</span>`;
+  }
+  leg += `<span style="color:var(--muted);margin-left:16px;">// BUBBLE SIZE = tokens (M)</span>`;
+  document.getElementById('legend').innerHTML = leg;
+}
+
+// ============================================================
+// RENDER 02: Ranked table
+// ============================================================
+function renderRanked(data) {
+  const rows = data
+    .filter(m => m.cost_per_task > 0 && m.intel != null)
+    .map(m => ({ ...m, score: m.intel / m.cost_per_task * 1000 }))
+    .sort((a, b) => b.score - a.score);
+
+  const tbody = document.querySelector('#ranked tbody');
+  tbody.innerHTML = rows.map((m, i) => `
+    <tr>
+      <td style="color:var(--neon);font-weight:800;">${String(i+1).padStart(2,'0')}</td>
+      <td>${m.name}</td>
+      <td style="color:var(--muted);">${m.creator}</td>
+      <td class="num">${m.intel}</td>
+      <td class="num">${m.score.toFixed(1)}</td>
+    </tr>
+  `).join('');
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+loadData().then(data => {
+  renderBubble(data);
+  renderRanked(data);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>// TITLE_HERE //</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --fg: #f5f5f0;
+    --muted: #888;
+    --border: #f5f5f0;
+    --panel: #111;
+    --neon: #b6ff3c;   /* primary lime */
+    --neon2: #00e5ff;  /* secondary cyan */
+    --warn: #ff3366;   /* danger red, use sparingly */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--fg); }
+  body {
+    font-family: 'IBM Plex Mono', 'JetBrains Mono', 'Courier New', monospace;
+    line-height: 1.5;
+    padding: 48px 32px;
+    /* engineering-paper grid */
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; }
+
+  /* Header */
+  header {
+    border: 3px solid var(--border);
+    padding: 24px 32px;
+    margin-bottom: 32px;
+    box-shadow: 8px 8px 0 var(--neon);
+    background: var(--panel);
+  }
+  header h1 { font-size: 32px; letter-spacing: -0.02em; font-weight: 800; }
+  header h1 span { color: var(--neon); }
+  header .meta {
+    color: var(--muted); font-size: 12px; margin-top: 8px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+
+  /* Section markers (the 01 // 02 // 03 // pattern) */
+  .section { margin-bottom: 48px; }
+  .section-marker {
+    display: flex; align-items: baseline; gap: 16px; margin-bottom: 16px;
+  }
+  .section-marker .num { color: var(--neon); font-weight: 800; font-size: 14px; }
+  .section-marker h2 {
+    font-size: 20px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .section-marker .tag {
+    color: var(--muted); font-size: 11px; text-transform: uppercase;
+  }
+
+  /* Card */
+  .card {
+    border: 3px solid var(--border);
+    background: var(--panel);
+    padding: 24px;
+    box-shadow: 6px 6px 0 var(--neon2);
+  }
+  .card.warn { box-shadow: 6px 6px 0 var(--warn); }
+  .card h3 {
+    font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 12px; color: var(--muted);
+  }
+  .card .big { font-size: 36px; font-weight: 800; line-height: 1; }
+  .card .big span { color: var(--neon); }
+
+  /* Chart panel (used as a wrapper around <svg> or <table>) */
+  .chart {
+    border: 3px solid var(--border);
+    background: var(--panel);
+    box-shadow: 8px 8px 0 var(--neon);
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .chart-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 16px;
+  }
+  .chart-head h2 { font-size: 18px; font-weight: 800; text-transform: uppercase; }
+  .chart-head .src { color: var(--muted); font-size: 11px; }
+
+  /* Comment / callout */
+  .comment {
+    color: var(--muted); font-style: italic;
+    padding: 12px 16px;
+    border-left: 3px solid var(--neon2);
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .comment::before { content: "// "; color: var(--neon2); font-style: normal; }
+
+  /* Layout grids */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  @media (max-width: 900px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+
+  /* Headline stat strip (4 KPIs in a row, no inner gaps) */
+  .strip {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    border: 3px solid var(--border);
+    margin-bottom: 32px;
+    box-shadow: 6px 6px 0 var(--neon);
+  }
+  .strip > div {
+    padding: 20px;
+    border-right: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .strip > div:last-child { border-right: 0; }
+  .strip .label {
+    color: var(--muted); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .strip .val { font-size: 28px; font-weight: 800; line-height: 1; margin-top: 8px; }
+  .strip .val span { color: var(--neon); }
+  @media (max-width: 700px) {
+    .strip { grid-template-columns: 1fr 1fr; }
+    .strip > div { border-bottom: 1px solid var(--border); }
+  }
+
+  /* Data table */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td {
+    text-align: left; padding: 8px 12px;
+    border-bottom: 1px solid #333;
+  }
+  th {
+    color: var(--neon);
+    text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em;
+    border-bottom: 2px solid var(--neon);
+  }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:hover td { background: rgba(182,255,60,0.05); }
+
+  /* Inline SVG (axes, points, labels) */
+  svg { display: block; max-width: 100%; height: auto; }
+  svg .axis text { fill: var(--muted); font-family: inherit; font-size: 10px; }
+  svg .axis line, svg .axis path { stroke: #444; }
+  svg .grid line { stroke: #1a1a1a; stroke-dasharray: 2 4; }
+  svg .point { cursor: crosshair; transition: filter 80ms linear; }
+  svg .point:hover, svg .label:hover {
+    filter: drop-shadow(0 0 6px var(--neon)) drop-shadow(0 0 12px var(--neon2));
+  }
+  svg .label { cursor: pointer; }
+
+  /* Tooltip (custom HTML, not native <title>) */
+  .tooltip {
+    position: fixed; pointer-events: none; z-index: 100;
+    background: #000; border: 2px solid var(--neon);
+    box-shadow: 4px 4px 0 var(--neon2);
+    padding: 10px 14px; font-size: 11px; line-height: 1.5;
+    max-width: 280px; display: none; white-space: pre-line;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .tooltip .tt-name { color: var(--neon); font-weight: 800; font-size: 12px; margin-bottom: 4px; }
+  .tooltip .tt-creator { color: var(--muted); font-size: 10px; text-transform: uppercase; margin-bottom: 6px; }
+  .tooltip .tt-row { display: flex; justify-content: space-between; gap: 16px; }
+  .tooltip .tt-row .k { color: var(--muted); }
+  .tooltip .tt-row .v { color: var(--fg); font-weight: 700; }
+  .tooltip .tt-row .v.neon { color: var(--neon); }
+  .tooltip .tt-seg { margin-top: 6px; padding-top: 6px; border-top: 1px dashed #333; }
+
+  /* Legend strip (color swatches under a chart) */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 12px 20px;
+    margin-top: 16px; padding-top: 16px;
+    border-top: 1px dashed var(--muted);
+    font-size: 11px;
+  }
+  .legend .item { display: flex; align-items: center; gap: 6px; }
+  .legend .dot {
+    width: 10px; height: 10px; display: inline-block;
+    border: 1px solid var(--fg);
+  }
+  .legend .size { color: var(--muted); margin-left: 16px; }
+
+  /* Footer (lab-notebook style) */
+  footer {
+    margin-top: 64px; padding-top: 24px;
+    border-top: 1px dashed var(--muted);
+    color: var(--muted); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="tooltip" id="tooltip"></div>
+
+<header>
+  <h1>// TITLE_HERE<span>//</span>SUBTITLE_HERE</h1>
+  <div class="meta">// META_LINE_HERE</div>
+</header>
+
+<!-- HEADLINE STATS -->
+<div class="strip">
+  <div><div class="label">// LABEL_1</div><div class="val">VALUE_1 <span>UNIT</span></div></div>
+  <div><div class="label">// LABEL_2</div><div class="val">VALUE_2</div></div>
+  <div><div class="label">// LABEL_3</div><div class="val">VALUE_3 <span>UNIT</span></div></div>
+  <div><div class="label">// LABEL_4</div><div class="val">VALUE_4</div></div>
+</div>
+
+<!-- SECTION 01 -->
+<div class="section">
+  <div class="section-marker">
+    <span class="num">01 //</span>
+    <h2>Section One Title</h2>
+    <span class="tag">// optional meta tag</span>
+  </div>
+
+  <div class="chart">
+    <div class="chart-head">
+      <h2>chart-title-here</h2>
+      <span class="src">// optional caption</span>
+    </div>
+    <svg viewBox="0 0 1100 600" id="chart"></svg>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="comment">
+    One-paragraph callout with the key insight. Use sparingly — one per section.
+  </div>
+</div>
+
+<!-- SECTION 02 — text cards (no chart) -->
+<div class="section">
+  <div class="section-marker">
+    <span class="num">02 //</span>
+    <h2>Section Two — Stat Cards</h2>
+  </div>
+  <div class="grid-2">
+    <div class="card warn">
+      <h3>// CARD WITH WARN SHADOW</h3>
+      <div class="big"><span>VALUE</span></div>
+      <p style="margin-top:12px;font-size:12px;color:var(--muted);">
+        Short caption explaining the number.
+      </p>
+    </div>
+    <div class="card">
+      <h3>// DEFAULT CARD (CYAN SHADOW)</h3>
+      <div class="big">VALUE</div>
+      <p style="margin-top:12px;font-size:12px;color:var(--muted);">
+        Short caption explaining the number.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 03 — table -->
+<div class="section">
+  <div class="section-marker">
+    <span class="num">03 //</span>
+    <h2>Section Three — Data Table</h2>
+  </div>
+  <div class="chart" style="box-shadow: 8px 8px 0 var(--neon2);">
+    <table>
+      <thead><tr><th>COL_1</th><th>COL_2</th><th class="num">NUMERIC</th></tr></thead>
+      <tbody>
+        <tr><td>row 1</td><td>data</td><td class="num">123</td></tr>
+        <tr><td>row 2</td><td>data</td><td class="num">456</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  // DATA: 38 MODELS · ARTIFICIAL ANALYSIS v4.1 · INTELLIGENCE INDEX = 9 WEIGHTED EVALS ·
+  // METHODOLOGY: one line of how the data was derived
+</footer>
+
+</div>
+
+<script>
+// Single entry-point: load data, then render.
+// Recommended: one JSON file in ./data/ the user fills in.
+async function loadData() {
+  // For one-file portability, you can inline JSON here:
+  // const models = { /* ... */ };
+  // return { models };
+  const res = await fetch('./data/data.json');
+  return await res.json();
+}
+
+function renderAll(data) {
+  // Build the SVG, wire tooltips, populate tables, etc.
+  // The pattern is: build a string of SVG markup, innerHTML it,
+  // then querySelectorAll and addEventListener for tooltips.
+}
+
+loadData().then(renderAll);
+</script>
+</body>
+</html>

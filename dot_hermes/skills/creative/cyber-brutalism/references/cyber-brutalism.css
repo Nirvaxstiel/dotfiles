@@ -1,0 +1,291 @@
+/* ========================================
+   Cyber-Brutalism CSS — drop-in stylesheet
+   Zero deps. Works with any framework.
+   ======================================== */
+
+/* ---------- Custom Properties ---------- */
+:root {
+  --cyber-black: #000000;
+  --cyber-elevated: #0a0a0a;
+  --cyber-surface: #111111;
+  --cyber-foreground: #ededed;
+  --cyber-muted: #666666;
+  --cyber-subtle: #444444;
+  --cyber-accent: #a3e635;
+  --cyber-accent-dim: #7ec22b;
+  --cyber-border: rgba(255, 255, 255, 0.08);
+  --cyber-border-strong: rgba(255, 255, 255, 0.15);
+  --cyber-danger: #e5484d;
+  --cyber-warning: #f5a623;
+  --cyber-info: #0070f3;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+  --grain-opacity: 0.035;
+  --radius: 0;
+}
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--cyber-black);
+  color: var(--cyber-foreground);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  position: relative;
+}
+
+/* ---------- Grain / Noise Overlay ---------- */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: overlay;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    opacity: calc(var(--grain-opacity) * 0.5);
+  }
+}
+
+/* ---------- Typography ---------- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 0.5em 0;
+  color: var(--cyber-foreground);
+}
+
+h1 { font-size: clamp(1.75rem, 4vw, 3rem); }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.125rem; }
+
+p { margin: 0 0 1em 0; }
+
+a {
+  color: var(--cyber-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.1s ease;
+}
+a:hover { color: var(--cyber-accent-dim); }
+
+/* ---------- Button ---------- */
+.cyber-btn,
+button.cyber-btn,
+a.cyber-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--cyber-accent);
+  color: var(--cyber-black);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.1s ease;
+}
+.cyber-btn:hover {
+  background-color: var(--cyber-accent-dim);
+  color: var(--cyber-black);
+}
+
+.cyber-btn--secondary {
+  background-color: transparent;
+  color: var(--cyber-foreground);
+  border: 1px solid var(--cyber-border-strong);
+}
+.cyber-btn--secondary:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+
+.cyber-btn--ghost {
+  background-color: transparent;
+  color: var(--cyber-muted);
+  border: none;
+}
+.cyber-btn--ghost:hover {
+  color: var(--cyber-foreground);
+}
+
+/* ---------- Card ---------- */
+.cyber-card {
+  background-color: var(--cyber-elevated);
+  border: 1px solid var(--cyber-border);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+}
+
+.cyber-card--bordered {
+  border-color: var(--cyber-border-strong);
+}
+
+.cyber-card--surface {
+  background-color: var(--cyber-surface);
+}
+
+/* ---------- Terminal / Code Block ---------- */
+.cyber-terminal {
+  background-color: var(--cyber-surface);
+  border: 1px solid var(--cyber-border);
+  padding: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--cyber-muted);
+  overflow-x: auto;
+  white-space: pre;
+  border-radius: var(--radius);
+}
+
+.cyber-terminal .prompt  { color: var(--cyber-accent); }
+.cyber-terminal .output  { color: var(--cyber-foreground); }
+.cyber-terminal .success { color: var(--cyber-accent); }
+.cyber-terminal .error   { color: var(--cyber-danger); }
+.cyber-terminal .dim     { color: var(--cyber-subtle); }
+
+/* ---------- Inline Code ---------- */
+code, .cyber-code {
+  background-color: var(--cyber-surface);
+  border: 1px solid var(--cyber-border);
+  padding: 0.125rem 0.375rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--cyber-accent);
+  border-radius: var(--radius);
+  word-break: break-word;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+/* ---------- Table ---------- */
+.cyber-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.cyber-table th,
+.cyber-table td {
+  text-align: left;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--cyber-border);
+}
+
+.cyber-table th {
+  color: var(--cyber-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+}
+
+.cyber-table td {
+  color: var(--cyber-foreground);
+}
+
+.cyber-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---------- Badge ---------- */
+.cyber-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid var(--cyber-border-strong);
+  border-radius: var(--radius);
+  color: var(--cyber-muted);
+}
+
+.cyber-badge--accent {
+  border-color: var(--cyber-accent);
+  color: var(--cyber-accent);
+}
+
+.cyber-badge--danger {
+  border-color: var(--cyber-danger);
+  color: var(--cyber-danger);
+}
+
+/* ---------- Input ---------- */
+.cyber-input {
+  width: 100%;
+  background-color: var(--cyber-surface);
+  border: 1px solid var(--cyber-border);
+  color: var(--cyber-foreground);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color 0.1s ease;
+}
+
+.cyber-input:focus {
+  border-color: var(--cyber-accent);
+}
+
+.cyber-input::placeholder {
+  color: var(--cyber-subtle);
+}
+
+/* ---------- Divider ---------- */
+.cyber-divider {
+  border: none;
+  border-top: 1px solid var(--cyber-border);
+  margin: 1.5rem 0;
+}
+
+/* ---------- Utilities ---------- */
+.cyber-bg        { background-color: var(--cyber-black); }
+.cyber-bg-surface { background-color: var(--cyber-elevated); }
+.cyber-text      { color: var(--cyber-foreground); }
+.cyber-muted     { color: var(--cyber-muted); }
+.cyber-accent    { color: var(--cyber-accent); }
+
+.cyber-border {
+  border: 1px solid var(--cyber-border);
+}
+
+.cyber-border-strong {
+  border: 1px solid var(--cyber-border-strong);
+}
+
+/* ---------- Grain intensity modifiers ---------- */
+.grain-light { --grain-opacity: 0.02; }
+.grain       { --grain-opacity: 0.035; }
+.grain-heavy { --grain-opacity: 0.05; }
