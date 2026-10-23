@@ -59,11 +59,11 @@ assert `"\r" not in content` so the repo never silently gains a CRLF file.
 ### 3. Hand POSIX paths to anything bash or a native tool reads
 `terminal` runs bash, but MSYS does NOT translate path arguments for native
 programs. A Windows `Path()` string interpolated into a bash command loses its
-backslashes (`C:\Users\Kei\x` becomes `C:UsersKeix`), so the command reads or
+backslashes (`$HOME\x` becomes `$HOMEx`), so the command reads or
 writes the WRONG file — and frequently still exits 0.
 
 ```python
-p = pathlib.Path(...).as_posix()      # C:/Users/Kei/x — safe for bash
+p = pathlib.Path(...).as_posix()      # $HOME/x — safe for bash
 ```
 
 Always assert the intended side effect as well as the exit code.

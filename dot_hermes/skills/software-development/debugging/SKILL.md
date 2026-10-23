@@ -130,12 +130,12 @@ correctly, but a native `python.exe` invoked with that same path throws
 `FileNotFoundError: [Errno 2] No such file or directory: '/c/Users/...'`. Same
 absolute path, opposite result — pure shell-vs-native-binary path semantics.
 This produces a maddening "file exists" (bash) vs "file not found" (python) split
-that looks like data loss. **Fix: pass Windows-style `C:/Users/...` (forward
-slashes) to `python`/`python -c`/`python -m`, and `/c/Users/...` (or `C:/`) only to
+that looks like data loss. **Fix: pass Windows-style `$HOME/...` (forward
+slashes) to `python`/`python -c`/`python -m`, and `/c/...` (or `$HOME`) only to
 bash builtins (`test`, `cp`, `ls`, `git`).** Do NOT wrap `$VAR` containing an
 MSYS path inside a single-quoted python `-c` string — the shell won't expand it
 inside the quotes; interpolate via an unquoted `python -c "..."` with the literal
-`C:/` path, or set `ref = "C:/Users/..."` in Python directly.
+`$HOME` path, or set `ref = "$HOME/..."` in Python directly.
 
 ### Pitfall — don't conflate "committed artifacts are stale" with "refactor broke output"
 If an offline build from committed sources reproduces committed outputs

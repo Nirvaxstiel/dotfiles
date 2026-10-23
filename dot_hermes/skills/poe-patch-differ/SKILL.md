@@ -78,8 +78,8 @@ If opinion is wanted later, that is a SEPARATE artifact, not this differ.
   `Return to top`. Recipe: write the HTML to a file, then with `execute_code` slice on the date
   strings and `re.sub(r'<[^>]+>', ' ', seg)` to strip tags. Working example:
   ```python
-  import re, html
-  h = open("C:/Users/Kei/pn.html", encoding="utf-8", errors="ignore").read()
+  import os, re, html
+  h = open(os.path.expanduser("~pn.html"), encoding="utf-8", errors="ignore").read()
   for d in ["2026-07-23", "2026-07-24"]:
       m = re.search(r"Updates for " + d + r" Spoiler", h)
       start = m.end()

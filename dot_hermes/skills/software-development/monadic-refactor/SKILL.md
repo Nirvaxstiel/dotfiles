@@ -259,7 +259,7 @@ block (see trap 4). Compute counts from the collected list afterward.
    and have the caller pass the value (e.g. `get-targets $catalog $registry`).
 7. **Re-sourcing a file with `def`s is fine** (`source a.nu; source a.nu`), but
    `source` needs a NATIVE path on Windows/MSYS — `/c/...` is rewritten to
-   `\c\...` and "File not found". Pass `C:/Users/...` forward-slash native
+   `\c\...` and "File not found". Pass `$HOME/...` forward-slash native
    paths to `nu -c 'source ...'` and `source`.
 8. **`assert-equal` must compare RAW values, not `to nuon` strings.** Don't wrap
    test args in `| to nuon` — that stringifies lists and they compare unequal

@@ -65,4 +65,4 @@ If a config-side bootstrap is genuinely wanted anyway, derive the desired set fr
 5. Measure `$nu.startup-time` A/B over several runs and report the spread, not one run. On this config the whole startup is ~145 ms without the call and ~154-170 ms with it: roughly +10 ms from parsing the ~43 KB registry every launch.
 6. Gitignore the registry file: `plugin.msgpackz` is generated machine state and belongs with `/vendor` and the maid registry, not in the tracked config.
 
-Pass native forward-slash paths to `nu --config` (`C:/Users/.../config.nu`). MSYS `/c/...` paths are not converted and fail with `File not found`.
+Pass native forward-slash paths to `nu --config` (`$HOME/.../config.nu`). MSYS `/c/...` paths are not converted and fail with `File not found`.

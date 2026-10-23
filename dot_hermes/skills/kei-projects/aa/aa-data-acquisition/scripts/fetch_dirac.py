@@ -20,10 +20,8 @@ import urllib.request
 URL = "https://dirac.run/posts/cache-hit-rates-agents"
 
 # Default repo path; override via argv[1] or DIRAC_REPO env.
-DEFAULT_REPO = (
-    r"C:/Users/Kei/.obsidian/Vault/KeiUniverse/IRL/Reference/"
-    r"LLM Provider Pricing Analysis"
-)
+Path = r"~/.obsidian/Vault/KeiUniverse/IRL/Reference/"
+DEFAULT_REPO = os.path.expanduser(Path + r"LLM Provider Pricing Analysis")
 
 
 def _num(s: str):
