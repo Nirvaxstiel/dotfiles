@@ -183,6 +183,23 @@ This pairs with the doc-parity rule in `monadic-refactor`: docs must describe CU
 - Lead with the change/answer. Skip the walkthrough. Never hedge as if the user can't read code. A one-line *why* for a non-obvious decision is fine; narrating *what* is not.
 - Do not write comments (code OR chat) that merely restate behavior the reader can see. That is the "bullshit comment" class — delete on sight.
 
+### 8. Config-file comments: state the constraint, not the decision story
+**User directive:** "we dont need the whole grandmother story to be in comments every time we make a decision. we dont own this for a million users."
+
+Nix/TOML/YAML configs still get ZERO explanatory comments by default. A comment is
+allowed only for a pitfall or a needed side-effect — and then it is ONE line
+naming the constraint. Never narrate why an option was chosen, what was tried
+first, or what was dropped.
+
+- DELETE: "The terminals deliberately do not use home-manager's programs.*
+  modules: those append shell integration to ~/.bashrc and ~/.zshrc, which
+  chezmoi owns. Ghostty is the sole terminal emulator; wezterm and rio were
+  dropped (their dotfiles remain in the repo...)"
+- KEEP: `# Ghostty is the only terminal. uv/uvx: jcodemunch MCP needs them.`
+  Two lines, each a constraint the reader cannot infer from the list below.
+- Dropped packages/options need no tombstone. Delete them; git is the archive.
+- Rationale belongs in the commit message or the chat reply, never in the file.
+
 ## Bulk Comment Stripping Process
 
 ### Step 1: Single-line docstrings (safest first)
