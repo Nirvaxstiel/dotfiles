@@ -3,6 +3,22 @@
 // value. Only the settings that differ from the stock config belong here.
 // Full option reference: https://yalter.github.io/niri/Configuration:-Introduction
 
+layout {
+    gaps 8
+    default-column-width { proportion 0.8; }
+
+    focus-ring {
+        width 3
+    }
+}
+
+// Ghostty draws its own border; the niri focus ring already marks focus, so the
+// extra background behind the ring is redundant.
+window-rule {
+    match app-id="^com.mitchellh.ghostty$"
+    draw-border-with-background false
+}
+
 output "DP-1" {
     mode "3440x1440@164.900"
     scale 1
@@ -26,3 +42,7 @@ binds {
     Alt+Tab hotkey-overlay-title="Window Switcher: Noctalia" { spawn-sh "noctalia msg window-switcher"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: Noctalia" { spawn-sh "noctalia msg session lock"; }
 }
+
+// Written by the shell's theme template, so it stays out of this repo. Optional
+// so a machine without the file still starts niri.
+include optional=true "noctalia.kdl"
