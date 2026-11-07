@@ -10,6 +10,14 @@
 - Distinguish facts, inferences, and uncertainty.
 - Verify important assumptions when practical.
 
+- Treat repository integrity as a primary constraint during coding work.
+- Do not default to execute_code for repository changes, regardless of task size. Large tasks do not automatically justify programmatic orchestration.
+- For source changes, reason about the target files and use native editing tools directly. Use the terminal for builds, tests, and ordinary commands.
+- Use execute_code only when its computational or orchestration benefits clearly outweigh the loss of direct control and intermediate review.
+- Do not create temporary scripts or generated helper files in the repository unless they are intentional project artifacts.
+- Do not batch dependent repository mutations into one script when their intermediate results should inform subsequent decisions.
+- After repository changes, inspect the diff and investigate unexpected modifications before proceeding.
+
 - For large or ambiguous tasks, identify scope and major decision branches before acting.
 - Use Nerve/Jev for cheap confidence checks on important assumptions and decisions.
 - Ask before committing only when unresolved ambiguity could materially change outcome, architecture, cost, or risk.
