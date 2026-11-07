@@ -8,7 +8,7 @@ description: Umbrella for the "LLM Provider Pricing Analysis" repo project skill
 
 Domain landing for the Artificial Analysis pricing-pipeline project (repo: `.../LLM Provider Pricing Analysis/`, an Obsidian vault subfolder). Zero-build JS, no TS. Pipeline: raw source files → `model_registry.json` → `axes_catalog.json` → `processed.js` (consumed by `viz/*.js`).
 
-This domain holds three coordinated skills (physically under `kei-projects/aa/`). Load the one matching the task:
+This domain holds four coordinated skills (physically under `kei-projects/aa/`). Load the one matching the task:
 
 | Skill | When to load |
 |---|---|
@@ -26,29 +26,28 @@ This domain holds three coordinated skills (physically under `kei-projects/aa/`)
 - Multi-source honesty: nulls are gaps, never override; AA owns `intel`/`cost_per_task`/`context_window`/`speed_tps`/`ttft`/`tokens_m` — don't duplicate.
 - `processed.js` is a wrapper `{sources, sources_meta, models}`; UI unwraps `.models`. The test suite's loaders must unwrap too.
 
-## Build orchestration & refactor mandate (enforced by user, twice)
-The repo has ONE orchestrator idiom — `Pipeline(ctx).then(name, fn).then(...).run()` from `data/_pipeline.py`, ported to JS as `window.Result.Pipeline` in `viz/_result.js`. Reuse it everywhere.
-- **NEVER hand-roll a `steps` tuple + manual `for` loop** to run pipeline stages. The user explicitly rejected this as "ugly"/"inconsistent" vs the existing `Pipeline`. It is the default trap when refactoring a lockstep `run()`/`build()`.
-- Python inner stages (`_build_registry.run()`, `_build_axes.run()`, `_build_dashboard_data.build()`) and JS boot (`viz/_boot.js`) ALL compose steps via `.then().run()`.
-- **Monster→monad rule:** if a function does several unrelated things and uses comment-section banners (`# ── X ──`, `// --- Y ---`, `# Section`) to carve out the space, that banner is the signal to EXTRACT each concern into a named helper and wire it as a `.then()` step. Drop the banner. (Example: `_build_registry.run()`'s inline `# ── Summary ──` block → extracted to `_print_summary()` as a terminal `.then("print_summary", ...)` step in commit `bee9643`.)
-- `Pipeline.run()` returns `ctx` (not a wrapped Result). Each step stores its return under `ctx[step_name]`; terminal steps that return `ok({...})` get UNWRAPPED by `run()`, so callers must do `return ok(pipeline.ctx["step_name"])` to re-wrap. After `.run()`, check `if pipeline.ctx.get("_failed_step"): return err(pipeline.ctx["_error"])` before reading outputs.
-- Render/event viz code (`render()` internals) is intentionally NOT monadified — only orchestration/boot flow uses the Pipeline. Don't contrive dropdown widgets etc. into steps.
+## Build orchestration (summary)
+The repo has ONE orchestrator idiom — `Pipeline(ctx).then(name, fn).then(...).run()` from
+`data/_pipeline.py` (ported to JS as `window.Result.Pipeline`). The refactor mandate,
+the never-hand-roll-a-steps-loop rule, and the monster→monad banner signal are
+detailed in **`monadic-refactor`** and **`pipeline-source-integration` §4**. Keep
+orchestration there; this umbrella only names the idiom.
 
-## Build invocation — offline vs pull (CRITICAL pitfall)
-`data/_pipeline.py` CLI gate only matches the literal `"build"`:
-- `python -m data._pipeline build` or `build_from_cache` → **OFFLINE**, no network. Reads committed `data/sources/*`, writes `model_registry.json` / `axes_catalog.json` / `processed.js`.
-- `python -m data._pipeline` (no arg) or **ANY other arg** (e.g. `build_from_cache` misspelled) → falls through to `build()` → **full network PULL** (LiveBench/OpenLLM/OpenRouter) + rebuild.
-- **Trap:** `python -m data._pipeline build_from_cache` does NOT match `"build"` → it runs the full pull, silently rewriting `data/sources/openrouter_models.json` + all derived artifacts. Always use the bare `build` subcommand for offline. Fixed in commit `5567093`.
-- Verify offline reproducibility: `git checkout -- data/sources/ data/model_registry.json data/axes_catalog.json data/processed.js`, then run offline build, then `git diff --stat` + `git hash-object` each artifact vs HEAD — must be byte-identical. The determinism test (`tests/test_pipeline_determinism.py`) calls `build_from_cache(ctx)` as a FUNCTION (correct, no pull).
+## Build invocation — offline vs pull (summary)
+`data/_pipeline.py`'s CLI gate matches only the literal `"build"` as offline; ANY other
+arg (including a misspelled `build_from_cache`) falls through to a full network pull.
+The canonical rules, the arg-fallthrough trap, and the byte-identical
+determinism-check recipe live in **`pipeline-source-integration` §4** — load it
+before rebuilding or refreshing sources. Do not restate the CLI matrix here.
 
-## Release manifest + deploy gate (added 2026-09-25)
+## Release manifest + deploy gate
 `_build_dashboard_data.build()` writes `data/manifest.json` beside the artifact it records: `build_id` (`{generated}@{sha256[:12]}`), `generated`, `artifact`, `artifact_sha256`, `model_count`, `sources` (name → `as_of`).
 - `data/_verify_manifest.py` recomputes those three fields from the committed artifact and returns Err on drift; both deploy workflows run `PYTHONPATH=data python3 data/_verify_manifest.py` before publishing. Run it standalone after any artifact write.
 - **Never put `git_sha` in the manifest.** It is unknowable at build time, so every commit + rebuild dirties the file. Identity is the artifact hash; the commit is in git history. Removing it made the manifest stable across commits (verified: identical sha256 before and after a commit + rebuild).
 - Keep the manifest OUT of the `test_pipeline_determinism.py` byte-compare set (`model_registry.json`, `axes_catalog.json`, `processed.js`) — a timestamped file in that set can never pass.
 - Manifest drift is a real failure mode: a stale `processed.js` shipping against a fresh manifest is exactly the mixed-age-data bug. The gate exists to make that impossible to deploy.
 
-## Failed-refresh signal (added 2026-09-25)
+## Failed-refresh signal
 `_pull_sources.run()` writes `data/sources/_pull_status.json` (`checked_at`, `ok`, `failed` with error text) **before** the all-failed check, so a total failure is still recorded. A failed refresh leaves the previous source file in place and the build still succeeds.
 - `_build_registry._source_meta()` reads it via `PULL_KEYS` (pull key → registry display name: `aa`→`aa_public_catalog`, `livebench`→`livebench`, `openllm_aa_subset`→`openllm`, `openrouter`→`openrouter`, `dirac`→`dirac`; `arena_code`/`arena_text` have no pull key) and adds `refresh_failed` + `refresh_error` to the affected source only.
 - Surfaces: `viz/_boot.js` footer (`// REFRESH FAILED`) and `viz/_shared.js axisProvenance()` (`REFRESH FAILED` in each affected chart's provenance note).
@@ -64,9 +63,7 @@ When acting on third-party review feedback (no full repo visibility), verify eac
 - `viz/_boot.js` and `_shared.js` are load-time IIFEs, so they cannot be unit-tested through the repo's Node harness (`new Function('window', src)`) without refactoring. `desktop_preview` read is the honest verification for boot/footer behaviour.
 
 ## References (session-hardened detail)
-- `references/aa-build-verify.md` — exact offline/pull CLI matrix, the `build_from_cache` arg trap, the `PYTHONPATH=data` run gotcha (bare `from _result import`), the fuzzy-patch duplicate-block corruption pitfall, and the byte-identical determinism-check recipe. Load when rebuilding, refreshing sources, or investigating "values changed" complaints.
-
-## References (session-hardened detail)
+- `references/aa-build-verify.md` — offline/pull CLI matrix, the `build_from_cache` arg trap, the `PYTHONPATH=data` run gotcha (bare `from _result import`), the fuzzy-patch duplicate-block corruption pitfall, and the byte-identical determinism-check recipe. Load when rebuilding, refreshing sources, or investigating "values changed" complaints.
 - `references/aa-data-viz-pitfalls.md` — real bugs + how to investigate this pipeline's data/viz layer: `cost`≠per-task (`cost_per_task` priority chain: API→breakdown→image→null), `reasoning_tax_pct` derivation, `#tooltip` (not `getTooltipEl`), `VIZ_DEFAULTS` + positional tab numbering. Load when tracing a "weird viz" or bad-cost symptom.
 - `references/aa-api-properties.md` — condensed AA Data API v2 property map (what each field means, tiers, the `cost_per_task.total_cost` authoritative per-task source). Load when mapping API fields or debugging data semantics.
 

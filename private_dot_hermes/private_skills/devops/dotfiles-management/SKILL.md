@@ -35,6 +35,11 @@ home-manager/Nix both manage the same path, and never keep the same file in two
 repos. Pick the owner and delete the other copy in the same change — a second
 copy is drift, not redundancy.
 
+**Runtime-generated files belong to the app.** A theme engine or shell that
+writes CSS/config on a hook owns those paths; exclude them from the dotfiles
+manager. Managing them creates a fight where `chezmoi apply` removes the app's
+import and the next theme change recreates it.
+
 Which layer should own what:
 - **Dotfiles repo / manager** — anything mutable that gets edited live, and
   anything that must also exist on a non-Nix OS.
@@ -42,11 +47,19 @@ Which layer should own what:
   and the app binaries with their systemd units. HM is the wrong owner for ANY
   file a human edits, and the mechanism is why: `xdg.configFile.*.source`/`.text`
   and `programs.*.settings` create a **symlink into the read-only store**
-  (`ln -Tsf`, not a hardlink), so an in-place write fails. Worse, a tool that
-  writes temp-then-`rename()` REPLACES the symlink with a real file, and the next
-  switch force-links over it — silently destroying the edit unless
-  `home-manager.backupFileExtension` is set. `lib.file.mkOutOfStoreSymlink` is the
-  one writable escape hatch. `home.activation` is a different mechanism entirely:
+  (`ln -Tsf`, not a hardlink), so an in-place write fails. A tool that writes
+  temp-then-`rename()` REPLACES the symlink with a real file instead — and the
+  next switch does NOT clobber it silently: `checkLinkTargets` runs before
+  linking and `exit 1`s with a remedy menu (`-b backup`, `backupFileExtension`,
+  `backupCommand`, or `force = true`) when a non-HM file is in the way and its
+  content differs. What HM genuinely lacks is PROMOTION — no diff, no record of
+  what changed, no merge path — so the edit-live-then-promote habit belongs to
+  the dotfiles manager (`chezmoi re-add`), not to HM.
+  `lib.file.mkOutOfStoreSymlink` is the writable escape hatch, but it bakes an
+  absolute path at eval time (move the repo and the store derivation dangles),
+  it is a symlink chain rather than a file, and an atomic write still replaces
+  the outer link and blocks the next switch. `home.activation` is a different
+  mechanism entirely:
   plain shell, real files, stays editable.
 
 **Split the flake from the dotfiles.** The boundary is: the flake owns the
@@ -317,6 +330,38 @@ config per OS. One-off interactive assignments do not persist: check `env.nu`
   (`hermes plugins enable|disable`, `hermes skills opt-out|opt-in`) instead of
   inventing a JSON-string encoding — and confirm that CLI exists before
   promising it.
+
+  **Setting a whole list through a setter is DESTRUCTIVE, not additive.** A
+  `config set <key> '["a","b"]'` REPLACES the list, so every entry toggled by
+  hand since the last apply is reverted — measured: the live list had drifted
+  and the script would have wiped two entries and force-restored a removed one.
+  Prefer the app's additive command (`plugins install --enable` adds exactly one
+  entry) and leave the aggregate list to the app. The upstream tell that a key
+  is protected this way is an entry in the app's own known-container-type table
+  carrying a comment about not clobbering a user allow-list.
+
+  **A provisioning script under `set -e` must tolerate the installer's
+  "already installed" exit.** Installers commonly exit non-zero with
+  "already exists, use --force" on a second run, which aborts the script
+  partway and SILENTLY SKIPS every later line — the worst failure mode, because
+  nothing reports it. Tolerate only that known message and fail loudly on
+  anything else; never a blanket `|| true`, which hides real failures such as a
+  dead network:
+  ```bash
+  install_plugin() {
+    local out
+    if out=$(hermes plugins install "$1" --yes-deps --enable 2>&1); then return 0; fi
+    case "$out" in
+      *"already exists"* | *"already installed"*) return 0 ;;
+    esac
+    printf '%s\n' "$out" >&2
+    return 1
+  }
+  ```
+  Check whether the installer already no-ops before adding the guard — a
+  warn-and-continue installer needs none. Prove the guard with a mock binary on
+  `PATH` rather than by re-running the real installer, and verify it under
+  `set -e` that a genuine failure still aborts.
 
   **Prove the split with the app's own provenance listing, not the filesystem.**
   A `list` subcommand with a Source column, an install audit log, and a bundled

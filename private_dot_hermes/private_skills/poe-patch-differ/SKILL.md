@@ -54,7 +54,7 @@ If opinion is wanted later, that is a SEPARATE artifact, not this differ.
     meta/legend, no subtitle, no header accent bar, no right-panel border.
 
 ## Invocation (read this — host quirks)
-- Use `python` (NOT `python3` — `python3` is missing on this Windows/MSYS host; `python` is 3.11).
+- Use `python3` (on NixOS the Hermes-bundled interpreter is 3.14; `python` is usually a symlink to it).
 - The SPA fetches league JSON at runtime, so **`file://` opening is blocked by most browsers**
   (opaque-origin `fetch`). Serve the folder (`python -m http.server` from repo root) or deploy to
   GitHub/Forgejo Pages (works natively). Document this in the repo README so users don't open

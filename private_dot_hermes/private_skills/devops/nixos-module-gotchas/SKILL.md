@@ -16,6 +16,14 @@ Option names drift between releases. A wrong option = eval failure on-target (yo
    `https://raw.githubusercontent.com/nix-community/home-manager/release-26.05/modules/...`
 3. Read the `options = { ... }` block to confirm exact attr paths + types.
 
+When fetching raw module source with `curl` (needed when `web_extract` truncates),
+write to `/tmp/<file>` or `$TMPDIR` — both are ordinary writable paths on NixOS.
+
+A file in `~/.hermes/cache/scratch` is NOT durable across tool calls: entries
+idle >24h are pruned, and it deleted a mid-analysis baseline twice in one
+session. Fetch what you need inside a single `execute_code` call, or read the
+source directly there — never stage an analysis across calls through scratch.
+
 ## Gotcha 1: top-level `options` + top-level config shorthand is REJECTED
 A module may use EITHER:
 - pure shorthand: top-level `services.foo = {...};` (no `options` key), OR
@@ -55,8 +63,32 @@ Post-login stderr noise, NOT a config defect. The `niri-session` script inside t
 - Bridge: `home-manager.nixosModules.home-manager` + `useGlobalPkgs = true` + `extraSpecialArgs = { inherit inputs; }` + `users.<name> = import <home tree>;`.
 - One `nixos-rebuild switch` builds system + HM in one invocation but HM activates as a SEPARATE user activation phase (not one ACID transaction).
 - HM has NO niri module in 26.05 (PRs #7534/#8575 draft) — configure niri at the system layer.
-- `programs.noctalia` from `noctalia-shell.homeModules.default` (the package was mid-rename `noctalia`/`noctalia-shell`; the module sets the option internally, so use the module not a bare `enable` guess).
-- Symlink landmine: HM-managed dotfiles (`~/.bashrc`, etc.) are store symlinks; editing them directly = wiped on rebuild. Put changes in the module (`programs.bash.initExtra` / `shellAliases`).
+- `programs.noctalia` from `noctalia-shell.nixosModules.default` — the flake ships
+  both halves, and the NixOS one carries `recommendedServices.enable`
+  (NetworkManager, Bluetooth, UPower, power profiles) that the HM module never
+  mentions. The package was mid-rename `noctalia`/`noctalia-shell`; the module
+  sets the option internally, so use the module not a bare `enable` guess.
+- Symlink landmine: HM-managed dotfiles (`~/.bashrc`, etc.) are store symlinks,
+  so an in-place write fails or is replaced by a real file. The next switch does
+  NOT silently clobber it — it fails loudly with a remedy menu. Put changes in
+  the module (`programs.bash.initExtra` / `shellAliases`) rather than editing the
+  live file.
+
+## Gotcha 7: niri config seeding and `include`
+- niri writes `~/.config/niri/config.kdl` from its own bundled
+  `resources/default-config.kdl` ONLY when the file is absent —
+  `File::options().create_new(true)` with `AlreadyExists => return Ok(())`. It
+  never rewrites an existing config and has no GUI editor; runtime changes go
+  through `niri msg` IPC and are not persisted. A seed script guarded by
+  `if [ ! -e "$target" ]` is therefore correct and mirrors the app's semantics.
+- That stock default ships in the package's **`doc` output** at
+  `$doc/share/doc/niri/default-config.kdl` (verified 26.05). Reference
+  `${config.programs.niri.package.doc}` rather than vendoring a copy, so the
+  seeded config cannot fall behind the installed version.
+- `include` accepts **`optional=true`** and expands `~` (verified in
+  `niri-config/src/lib.rs`). Use it when the included file belongs to a dotfiles
+  manager: without `optional`, a machine that has activated NixOS but not yet
+  applied chezmoi fails to start niri on the missing include.
 
 ## Auditing whether home-manager still earns its place
 When dotfiles live in a separate manager, HM's remaining job can shrink to
@@ -70,6 +102,16 @@ Audit before keeping it — the split often makes HM redundant:
   `https://api.github.com/repos/NixOS/nixpkgs/contents/nixos/modules/programs?ref=<branch>`
   — `git`, `lazygit`, `vim` and `firefox` exist there; most app configs do not,
   and do not need to.
+- **`programs.git` exists at BOTH layers with DIFFERENT options.** HM has
+  `settings` (writes `~/.gitconfig`); NixOS has no `settings` at all — only
+  `config`, which writes **`/etc/gitconfig`**, so a NixOS-side identity applies to
+  every user including root. `programs.lazygit.settings` does exist at the NixOS
+  layer and likewise writes `/etc`.
+- **`system.activationScripts` is the NixOS twin of `home.activation`**, shaped
+  `{ deps = [ ... ]; text = "..."; }`. It runs as ROOT, so a script writing into
+  `$HOME` must `install -o <user> -g <group>` and chown, or the user ends up with
+  a root-owned config they cannot edit. Set `deps = [ "users" ]` so the account
+  exists before the script runs.
 - **Third-party flakes often ship both halves.** Read the flake's `outputs` block:
   a `nixosModules.default` importing a different file from `homeModules.default`
   usually carries the same options at the system layer, including systemd user
@@ -79,6 +121,15 @@ Audit before keeping it — the split often makes HM redundant:
   purpose is to stop HM writing `~/.bashrc`/`~/.zshrc`. They vanish with HM.
 - **Mechanism swaps:** `home.activation` -> `system.activationScripts`,
   `home.stateVersion` -> `system.stateVersion`.
+- **Dropping HM collapses the module tree.** A `modules/<feature>/nixos.nix` +
+  `home-manager.nix` pair exists only because both layers read the same feature;
+  with HM gone each becomes a single `modules/<feature>.nix` imported directly
+  by `hosts/.../configuration.nix`, and `home/<user>/home.nix` disappears
+  entirely. Flatten in the SAME change that drops HM, or you leave empty
+  directories, stale import paths and an orphan module behind. Grep the whole
+  tree for `home-manager`, `homeManagerModules`, `xdg.configFile` and
+  `home.activation` afterwards — a module left unreferenced still evaluates
+  fine and only breaks when someone re-imports it.
 - Dropping HM also removes the two-phase activation risk: HM activates as a
   separate user phase, so a failed second phase leaves the system already switched.
 
@@ -97,6 +148,18 @@ that CANNOT live in the app's own config file at all — CLI flags, env vars, an
 runtime PATH dependencies. A flat attrset API of flags and env gives you neither
 the typed surface nor the file-location choice, so you would be writing your own
 option layer on top of it anyway.
+
+## Gotcha: niri's `useNautilus` only wires the D-Bus portal
+
+`programs.niri.useNautilus = true;` (the default) adds `pkgs.nautilus` to
+`services.dbus.packages` for the FileChooser portal and switches the portal impl
+to `gnome`. It does NOT put the Nautilus binary or desktop entry in
+`environment.systemPackages`.
+
+A standalone Nautilus needs the package explicitly, plus `services.gvfs.enable`
+and `programs.dconf.enable` for trash/network/media and settings persistence.
+See the `nixos-flake-config` skill's `niri-nautilus-noctalia.md` reference for
+the full recipe.
 
 ## Verification checklist before claiming "done" (no Nix on scaffold host)
 - [ ] every `services.*`/`programs.*`/`boot.*` option traced to its 26.05 source module

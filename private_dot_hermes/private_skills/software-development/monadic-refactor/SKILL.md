@@ -258,9 +258,8 @@ block (see trap 4). Compute counts from the collected list afterward.
    "Default values should be constant expressions". Make such params REQUIRED
    and have the caller pass the value (e.g. `get-targets $catalog $registry`).
 7. **Re-sourcing a file with `def`s is fine** (`source a.nu; source a.nu`), but
-   `source` needs a NATIVE path on Windows/MSYS — `/c/...` is rewritten to
-   `\c\...` and "File not found". Pass `$HOME/...` forward-slash native
-   paths to `nu -c 'source ...'` and `source`.
+   `source` needs an absolute or `$HOME`-relative path on NixOS/Linux. Pass
+   `$HOME/...` paths to `nu -c 'source ...'` and `source`.
 8. **`assert-equal` must compare RAW values, not `to nuon` strings.** Don't wrap
    test args in `| to nuon` — that stringifies lists and they compare unequal
    to a literal list. Compare `($got | to nuon) != ($want | to nuon)` only
@@ -408,9 +407,9 @@ asserts `window.Result` is wired and `window.MODELS` populates correctly.
   model count / alias count) — the refactor is behavior-preserving, so
   the output JSON must not change. A real-build smoke check catches
   regressions that black-box tests on stubs miss.
-- **MSYS `/tmp` does NOT persist across separate `terminal()` calls** on this
-  Windows host — each call is a fresh MSYS session and a `/tmp` path written in
-  one call may be absent (or a different mount) in the next, so interactive
+- **`/tmp` does NOT persist across separate `terminal()` calls** — each call is
+  a fresh shell session and a `/tmp` path written in one call may be absent in
+  the next (on NixOS, `/tmp` is also cleaned aggressively), so interactive
   before/after behavior-diffs that write to `/tmp` and read later silently
   fail with empty/garbage reads. Do the whole stash→build→capture→pop→build→
   compare in ONE terminal command. Alternative: leave the file in the repo tree

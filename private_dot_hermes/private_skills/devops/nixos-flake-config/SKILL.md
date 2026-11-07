@@ -61,6 +61,11 @@ secrets/sops.yaml         # vault routing (public keys / creation_rules only)
   The NixOS/Home-Manager module option name is mid-rename
   (`programs.noctalia` vs `programs.noctalia-shell`) and the NixOS module is
   deprecated — prefer the package path.
+- **Noctalia's NixOS module exposes no template options.** It starts the shell
+  and its recommended services; GTK/Qt app theming lives in Noctalia's own
+  `~/.config/noctalia/config.toml` (`[theme.templates] builtin_ids = [ "gtk3" "gtk4" ]`).
+  GUI changes in `~/.local/state/noctalia/settings.toml` override that file.
+  Do not search for a NixOS option to enable GTK templates.
 - **greetd `default_session.user`** defaults to the system user `"greeter"`
   (created by the greetd module). Override it to a real user or the session has
   no account to start. greetd auto-sets `services.displayManager.enable` and
@@ -140,3 +145,5 @@ set the password hash, fill any UUID stubs.
 ## References
 - `references/nixos-26.05-verified-options.md` — option names/paths confirmed
   against the `nixos-26.05` branch module source this session.
+- `references/niri-nautilus-noctalia.md` — Nautilus under niri with Noctalia:
+  packages, services, GTK template IDs, and chezmoi ownership traps.
