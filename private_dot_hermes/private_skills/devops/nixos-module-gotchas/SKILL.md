@@ -46,11 +46,19 @@ Post-login stderr noise, NOT a config defect. The `niri-session` script inside t
 - Harmless. Upstream niri issue #254/#3901, fix PR #3572 (enumerates vars) not yet in all nixpkgs releases.
 - DO NOT patch the flake for this. Only consider a nixpkgs overlay that rewrites `niri-session` if the noise truly blocks something (fragile, breaks on upstream fix).
 
-## Gotcha 4: hardware.nix is a generated artifact, not hand-authored
-- `nixos-generate-config --show-hardware-config > hosts/<host>/hardware.nix` emits `fileSystems."/"`, `boot.loader.*`, `hardware.*`. Without it, rebuild fails:
-  `error: The 'fileSystems' option does not specify your root file system.`
-- Keep machine-specific stubs (NTFS mounts etc.) in a SEPARATE file (e.g. `storage.nix`) so re-running generate-config (which overwrites `hardware.nix` via `>`) doesn't clobber them.
-- Import name in `configuration.nix` must match the generated filename exactly (`hardware.nix`, not `hardware-configuration.nix`).
+## Gotcha 4: preserve the generated hardware artifact
+- Generate actual hardware definitions with
+  `nixos-generate-config --show-hardware-config`. Without a root filesystem
+  definition, evaluation fails. With another machine's UUIDs, evaluation can
+  succeed but boot can fail.
+- Inspect imports before choosing the output filename. If `hardware.nix` is a
+  tracked wrapper importing `hardware.local.nix`, generate into the local file;
+  overwriting the wrapper destroys the source boundary.
+- Keep additional persistent mounts separate from generated root, boot, and swap
+  definitions, so hardware regeneration does not remove custom storage settings.
+- Use explicit `path:` flake sources when local artifacts are ignored; normal
+  Git sources omit them. Load `nixos-flake-config` for its complete local-artifact
+  setup and verification procedure.
 
 ## Gotcha 5: password safety without committing secrets
 - Use `users.users.<name>.hashedPasswordFile = "/etc/nixos/secrets/<user>.hash"` (NOT deprecated `passwordFile`, NOT literal `initialHashedPassword` in repo).
@@ -89,6 +97,66 @@ Post-login stderr noise, NOT a config defect. The `niri-session` script inside t
   `niri-config/src/lib.rs`). Use it when the included file belongs to a dotfiles
   manager: without `optional`, a machine that has activated NixOS but not yet
   applied chezmoi fails to start niri on the missing include.
+- **Includes are POSITIONAL and sections MERGE property-by-property.** A
+  `layout { gaps 8 }` in an included file changes gaps and nothing else, and it
+  overrides anything written BEFORE the include line. `binds` overrides
+  conflicting keys. `window-rule`/`output`/`workspace` are MULTIPART — inserted
+  as-is at the include position, never merged. That is what makes the
+  seed-`config.kdl` + dotfiles-`overrides.kdl` split work: local values live in
+  the included file only, never duplicated into the seed.
+- **Includes nest**, so the included file can itself `include` an app-generated
+  theme file. Put the optional include there, not in the Nix-owned `config.kdl`.
+- **Promote live niri edits into the included file.** The seeder never rewrites
+  `config.kdl`, so edits made there survive reboots but are invisible to the
+  dotfiles repo and vanish on a new machine or a deleted seed. Find them by
+  diffing live against `$doc/share/doc/niri/default-config.kdl`, move them to the
+  included file, then restore `config.kdl` to the stock doc plus the one seed
+  include line. Verify with `niri validate --config <path>` (parses without
+  touching the session); the applied config is confirmed by the
+  `niri_config: loaded config from ...` log line in the journal.
+- **Border is a special case**: `layout { border {} }` in an INCLUDED file does
+  nothing (no property changed → no-op), while the same in the main config
+  ENABLES the border. A theme file that only sets border colours therefore has no
+  effect unless `border { on; }` appears somewhere in the main config.
+
+## Gotcha 8: an NTFS volume mounted `rw` is still read-only for the user
+`fsType = "auto"` resolves to the kernel `ntfs3` driver. Without `uid`/`gid`/
+`umask`, ntfs3 synthesises modes from the on-disk NTFS ACLs — so a volume whose
+root is `0777` can contain root-owned `0755` directories, and apps fail to save
+while `findmnt` happily reports `rw`. Probe the actual write, never the flag:
+
+```bash
+D="/mnt/<vol>/<dir>"
+touch "$D/.probe" && rm -f "$D/.probe"   # Permission denied = this gotcha
+```
+
+FIX — map the Linux-side view at mount time. The NTFS ACLs on disk are untouched,
+so a dual-boot Windows keeps its own permissions and both sides can write:
+
+```nix
+fileSystems."/mnt/<vol>" = {
+  device = "/dev/disk/by-uuid/<UUID>";
+  fsType = "ntfs3";
+  options = [ "uid=1000" "gid=100" "umask=0022" "nofail" "x-systemd.device-timeout=10s" ];
+};
+```
+
+- `uid`/`gid`/`umask`/`dmask`/`fmask` are documented ntfs3 options (kernel
+  `filesystems/ntfs3.rst`). Pin `fsType = "ntfs3"` rather than `"auto"`; `auto`
+  does not guarantee a driver.
+- `chown`/`chmod` on an NTFS file do nothing — ownership is per-mount, so one
+  file cannot be handed to another user. Copy it to a POSIX filesystem instead of
+  chasing per-file permissions.
+- Dual-boot teaches this twice: an unclean Windows shutdown (Fast Startup,
+  hibernation) leaves the volume dirty and ntfs3 then mounts it **read-only**,
+  reproducing the same "cannot save" symptom from a different cause. `powercfg
+  /h off` on the Windows side prevents that.
+- For a file an app REWRITES constantly (a password vault, a session database),
+  prefer copying it to ext4 and leaving the NTFS copy as a cold snapshot. Two
+  live writers plus a dirty-flag failure mode is not worth the convenience.
+
+Secret-service ownership conflicts (two candidates for
+`org.freedesktop.secrets`): `references/secret-service-ownership.md`.
 
 ## Auditing whether home-manager still earns its place
 When dotfiles live in a separate manager, HM's remaining job can shrink to

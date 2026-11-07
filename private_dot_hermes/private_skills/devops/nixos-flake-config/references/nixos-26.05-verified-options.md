@@ -606,12 +606,18 @@ a **PROD** copy that seeds it. One-directional: live → flake.
   not the absolute path.
 
 ## filesystems.nix / NTFS landmines
-- `fsType = "ntfs-3g"` is FUSE → needs `pkgs.ntfs3g` in `environment.systemPackages`.
-- In-kernel alternative: `fsType = "ntfs3"` (drops uid/gid/umask options).
-- Mount options for a data-at-rest volume: `nofail`, `x-systemd.automount`,
-  `uid=1000`, `gid=100`, `umask=0022`.
-- Read-only failure ⇒ Windows "Fast Startup" dirty bit: fix via
-  `powercfg /h off` (Windows) or `ntfsfix -d /dev/sdX` (Linux).
+- `fsType = "ntfs-3g"` uses FUSE and needs the ntfs-3g mount helper.
+  On 26.05, `boot.supportedFilesystems = [ "ntfs" ]` adds `pkgs.ntfs3g`
+  to `system.fsPackages`; a separate systemPackages entry is not required.
+- `fsType = "ntfs3"` selects the kernel driver. It supports `uid`, `gid`,
+  `umask`, `fmask`, and `dmask`: https://docs.kernel.org/filesystems/ntfs3.html.
+- `fsType = "auto"` does not pin a driver. Inspect live mounts with `findmnt`.
+- Mount options for an optional data volume can include `nofail`,
+  `x-systemd.automount`, and ownership/mask options appropriate to the user.
+- Read-only mounts can result from hibernation, dirty filesystems, errors, or
+  explicit options. Disable Windows hibernation/Fast Startup when relevant;
+  repair corruption with Windows `chkdsk`. Do not recommend clearing dirty flags
+  or forcing a mount as a general repair.
 
 ## GPUs, unfree packages, and swapping vendor
 

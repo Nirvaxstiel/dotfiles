@@ -17,6 +17,7 @@ machine, at least one of which may be Windows.
 - Making one set of dotfiles exist on Windows **and** on Linux/NixOS.
 - Wiring a dotfiles repo into a NixOS flake so a new machine self-provisions.
 - Deciding whether the flake or the dotfiles repo owns a given file.
+- Migrating application settings and profiles between machines or operating systems.
 
 ## Core rule: probe the platform before choosing a tool
 Managers split into symlink-based and materialising. Whether the target OS can
@@ -62,16 +63,24 @@ Which layer should own what:
   mechanism entirely:
   plain shell, real files, stays editable.
 
-**Split the flake from the dotfiles.** The boundary is: the flake owns the
-SYSTEM, the dotfiles manager owns every file a human edits. Write a hand-edited
-config into the flake and you have created a file nobody can save. Corollary —
-a base config the app ships itself, where you only append one line, belongs to a
-flake `home.activation`, which writes a real file and stays editable.
+**Default to a system/dotfiles split.** Keep packages and services in the flake,
+and live-editable application files in the dotfiles manager. When the user
+explicitly chooses declarative system settings with ignored local Nix inputs,
+respect that boundary: edit the local Nix source, rebuild the generated system
+file, and do not introduce a second dotfiles owner. A seed activation can copy an
+app's base config into a real file without taking over later edits.
 
 **Before wiring ANY app config into the flake, ask the manager what it already
 owns** — `chezmoi managed | grep -i <app>`. A mature dotfiles repo owns more than
 you expect; the module you were about to write is then a SECOND owner of the same
 path. Delete the flake half in the same change.
+
+A hit on the DIRECTORY is not a hit on every file inside it. `chezmoi managed`
+lists directories and individual files separately, so test the exact path: an
+app directory can be managed while the main file beside it is not (e.g.
+`.config/niri` managed, `config.kdl` unmanaged, only `overrides.kdl` tracked).
+Editing the live file is then correct and survives apply — assuming the reverse
+and adding it to the source creates a duplicate owner.
 
 Check the reverse direction too: a `programs.*` option can own a file the moment
 it is ENABLED, not only once it is configured. `references/home-manager-file-ownership.md`
@@ -112,6 +121,26 @@ below. Alternatives: `references/windows-linking.md`; chezmoi mechanics:
    over hand-rolling the clone.
 5. Verify: list what the tool would change before applying, and confirm no path
    appears under both owners.
+
+## Configuration precedence and migration gates
+
+- Inspect the application's effective settings and their origins before changing
+  a source. For Git, use `git config --show-origin --show-scope --list`; global
+  and repository values can override a correct `/etc/gitconfig`.
+- Check both manager ownership and symlink targets with `chezmoi source-path`
+  and `readlink`. An unmanaged path can still be a stale Home Manager store link.
+  Back up its readable contents before replacing it; do not edit the store or
+  remove a file merely because it is unmanaged.
+- Preserve existing profiles and default selection during imports. Audit size,
+  version compatibility, active processes, and disposable data before copying.
+  Keep authentication and first launch with the user when requested.
+- Keep meaningful site data and database journals unless the user authorizes
+  their removal. Verify copies by checksum with identical exclusions; an rsync
+  exit code alone does not prove that a dry-run found no differences.
+- Verify actual destination permissions after cross-filesystem copies. Set
+  private profile directories to `700` and regular files to `600`; NTFS files
+  can arrive with execute bits even when the copy itself succeeds.
+- Use `references/application-profile-migration.md` for the profile-copy recipe.
 
 ## Pitfalls
 - **`ln -s` can silently copy.** Without the symlink privilege it creates a real
@@ -257,9 +286,30 @@ below. Alternatives: `references/windows-linking.md`; chezmoi mechanics:
   place. So removing source files that an external has taken over cannot delete
   the clone — but confirm the clones still exist anyway.
 - **`chezmoi apply` prompts on every changed file** (`diff/overwrite/
-  all-overwrite/skip/quit`) and will sit there forever under a non-interactive
+  `all-overwrite/skip/quit`) and will sit there forever under a non-interactive
   caller. Use `--no-tty -k` (or `--force`) in scripts; a "hang" is usually this,
   not the network.
+- **A targeted `chezmoi apply <dest-path>` / `chezmoi re-add <dest-path>` is the
+  surgical alternative to `--force`.** A plain `apply` stops at the FIRST diverged
+  target and dies with `could not open a new TTY`, so one unrelated conflict (a
+  hand-edited `.bashrc`) blocks a promotion of five other files. Passing the
+  destination path touches that file only and leaves every other conflict alone;
+  reserve `--force` for when you intend to overwrite everything.
+- **A tree the agent writes itself (skills, memory) is canonical on the DESTINATION.**
+  Promote it on demand with a targeted `chezmoi re-add <dest-path>`; never put it
+  behind a blanket `apply`, which reverts the agent's work to the last promoted
+  snapshot. Standing drift in such a tree is expected state, not a defect — do not
+  "fix" it on sight.
+- **Prove the live side is CORRECT before promoting live -> source.** That
+  direction has no safety net: `re-add` overwrites the source with whatever lives
+  on disk. Check claims against the tool's own validator or the filesystem rather
+  than re-reading the diff: a terminal binary's config dump lists the option names
+  the INSTALLED version accepts (a renamed key silently no-ops — `ghostty
+  +show-config` proved `background-blur` replaced `background-blur-radius`), and a
+  path referenced by a shell rc must exist on disk (the committed `.bashrc`
+  pointed at `ys-xtended.json` while only `ys.xtended.json` existed). Syntax-check
+  what you can: `bash -n` for an rc file, and say so plainly when the interpreter
+  is absent rather than implying it was tested.
 - **A zero-byte target is stored as `empty_<name>`** in the source. That is the
   `empty_` attribute, not a stray file — it maps back to the real name.
 
@@ -373,11 +423,13 @@ config per OS. One-off interactive assignments do not persist: check `env.nu`
   the defaults out of the source instead.
 
 ## Committing inside a dotfiles repo
-- **`commit.gpgsign = true` with no pinentry configured hangs the FIRST commit**
-  (gpg-agent cold start; later commits pass from the cache). Give scripted
-  commits a long timeout, and verify `git rev-parse HEAD` changed after each — a
-  commit that silently never ran leaves its staged files to be swept into the
-  NEXT commit under the wrong message.
+- **Inspect `gpg.format` before diagnosing signing.** OpenPGP signing can wait
+  for gpg-agent/pinentry; SSH signing uses SSH key handling instead. A setting
+  that points at a public key does not itself prove access to its private key.
+  Do not create a commit to test signing without permission, and leave key or
+  agent authentication to the user when requested. For an authorized commit,
+  verify that `git rev-parse HEAD` changed; exit status or cached authentication
+  alone does not prove the intended commit was created.
 - **`git commit` with no pathspec commits the ENTIRE INDEX, not what you staged
   in this command.** After `git reset --soft <base>` the whole tree is staged, so
   `git add -A -- dir` followed by `git commit` sweeps in every other staged file

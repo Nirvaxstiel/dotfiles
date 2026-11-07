@@ -43,6 +43,39 @@ A recommendation must also name what the plugin adds that nothing installed alre
 7. **Verify machine prerequisites before recommending.** Confirm the dependency a plugin needs actually exists: the browser that holds the user's logins for a browser plugin, plus `uv` / `node` / `pnpm` / a native host for anything else. Do not assume Chrome is present or that the user's logged-in profile is in the browser the plugin drives.
 8. **Report as a verdict table.** One row per candidate from the sweep, each with a one-line reason tied to a numbered criterion. Then a short "worth it" section, each item carrying the concrete config or install command, then the rejects. Lead with verdicts; no padding.
 
+## Verifying an installed plugin actually loads
+
+`hermes plugins list` and `hermes memory status` report catalog/config state —
+an enabled row says nothing about whether the module imported. Validate per
+directory:
+
+```bash
+for d in ~/.hermes/plugins/*/; do
+  printf '%-28s %s\n' "$(basename "$d")" \
+    "$(hermes plugins validate "$d" 2>&1 | grep -aE 'Validation (passed|failed)' | tail -1)"
+done
+```
+
+- **The offending name is on the line AFTER the `✗` marker**
+  (`undeclared hooks registered (not in provides_hooks):` then the name). Grepping
+  the marker alone reads as an empty diff.
+- **Manifest drift is the usual cause**: the catalog wrapper pins the surface of
+  the release it was written for while the resolver installs a newer package that
+  registers one more tool or hook. Add the name to `plugin.yaml`; do not downgrade.
+- **`<kind> '<name>' loaded but no provider instance found` is a wrapper message,
+  not the error.** It prints whenever the loader returns nothing — missing Python
+  dependency, `register()` raising, or an empty host process. Get the real cause
+  from the DEBUG log, not from that line.
+- **A plugin's Python dependencies are installed into a per-root generation venv,
+  and a running gateway never switches to a new one.** After enabling a plugin,
+  restart the gateway or every session keeps reporting the old state.
+- **Confirm the gateway runs the install you patched** before debugging the
+  plugin: `pgrep -af 'gateway run'` then
+  `tr '\0' '\n' </proc/<pid>/environ | grep HERMES_BIN`. A desktop app spawns the
+  agent pinned in its own wrapper, which can be a different build entirely.
+- **Optional tool packages can fail staging without blocking the plugin** — the
+  install reports `optional <pkg> was not installed` and continues.
+
 ## Pitfalls
 
 - **Process-wide monkeypatching of Hermes internals is a red flag, not a feature.** A disclosure that rebinds private symbols (`TurnRunner._progress_build_message`, `BasePlatformAdapter.format_tool_event`, `agent.display.*`) on the module and on every reference found in `sys.modules` will break silently on a Hermes update. Surface it as the top risk and recommend a throwaway profile for the trial.

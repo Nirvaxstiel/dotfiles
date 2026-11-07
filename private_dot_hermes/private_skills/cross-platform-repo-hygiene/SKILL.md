@@ -1,6 +1,6 @@
 ---
 name: cross-platform-repo-hygiene
-description: Use when a Windows-edited repo deploys to Linux.
+description: Use when a repo or skills tree changes host OS.
 version: 1.0.0
 author: hermes-curator
 license: MIT
@@ -20,6 +20,8 @@ require the target machine to fix or to detect.
 ## When to Use
 
 - Editing any repo on a Windows/MSYS host whose runtime or deploy target is Linux.
+- A host OS changed (e.g. Windows -> NixOS) and the repo's docs or skills still
+  carry the old OS's paths, commands, or workarounds.
 - Generating or copying files into such a repo from a script.
 - Writing a shell script that will only ever execute on the Linux side.
 - Verifying generated config or script logic when the target toolchain is not
@@ -98,7 +100,27 @@ target.unlink()
 Then re-check the repo root: a stray harness or fixture lands in `git status` as
 untracked junk and gets committed by accident.
 
+## Purging stale host-OS instructions after a migration
+
+When the host OS changes, docs and skills written for the old OS are wrong and
+future sessions repeat them. Sweep and rewrite; do not leave "on this Windows
+host" notes behind.
+
+1. Grep the whole tree for the old OS's idioms: drive letters (`C:/`, `/c/`),
+   `MSYS`, `cygpath`, `.exe`, `%APPDATA%`, `PowerShell`, `cmd.exe`.
+2. Rewrite each hit to the new OS's semantics, or delete the sentence if it only
+   existed to work around the old OS. Replace a workaround with the constraint
+   that still applies.
+3. Back up before bulk-deleting (`tar -czf ~/backups/<name>-$(date +%Y%m%d-%H%M%S).tar.gz <dir>`).
+4. Normalize line endings in the same pass; a migrated tree often arrives CRLF.
+5. A backup zip may be a strict subset of current state. Compare file/skill
+   counts and database sizes before importing; merge only the unique content
+   instead of restoring wholesale.
+
 ## Pitfalls
+- `find ... -exec sed -i 's/\r$//' {} +` aborts the entire batch when one path is
+  read-only (e.g. a read-only mount). Use `{} \;` with `|| true`, or restrict the
+  walk to writable directories.
 - A CRLF defect is invisible until the target executes the file. Grep for `\r` as
   a pre-commit step, never as a post-deploy investigation.
 - Exit code 0 does not mean the correct file was touched. Assert the side effect.
