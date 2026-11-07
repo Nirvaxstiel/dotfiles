@@ -12,3 +12,6 @@ export PATH="$HOME/.local/bin:$PATH"
 eval "$(oh-my-posh init bash --config '~/.config/omp/ys.xtended.json')"
 eval "$(zoxide init bash)"
 export GPG_TTY=$(tty)
+
+# nixpkgs names Zed's CLI zeditor (pkgs.zed is the Brimdata tool).
+alias zed=zeditor
