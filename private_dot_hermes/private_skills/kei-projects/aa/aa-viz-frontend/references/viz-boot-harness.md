@@ -58,7 +58,7 @@ Assert chart count with `html.split('<svg').length - 1`, and assert bar count wi
 `(html.match(/<g data-slug="/g) || []).length` against the pure transform's row count —
 that catches a chart-order/rows mismatch without a browser.
 
-## Windows path note
-`python.exe` is native Windows and does NOT understand MSYS `/c/...` paths — use `C:/...`
-(or `os.path` join) when reading files from python. Bash builtins (`test -f`, `git`) DO
-understand `/c/...`. Mixing them in one command is fine; just don't pass `/c/...` to python.
+## Path note (NixOS/Linux)
+Python, bash builtins and git all share the same POSIX filesystem — `/home/kei/...`
+paths work everywhere. Prefer absolute paths or `os.path.join`; there is no
+drive-letter/MSYS split to work around.

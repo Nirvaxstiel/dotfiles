@@ -119,23 +119,17 @@ The "before" you diff against is actually post-pull — so of course it differs.
    non-deterministic. Dig into the specific changed field (use `git diff` /
    `json.tool` on the artifact).
 
-### Pitfall — `diff -q "$f" <(git show HEAD:"$f")` fails on MSYS
-Process substitution `<(...)` with `diff` in git-bash can return a false DIFF
-silently. Use `git hash-object` (works on Windows/MSYS, no process substitution)
-as the source of truth for byte-equality.
+### Pitfall — byte-equality checks
+Process substitution `<(...)` works on NixOS/Linux. For byte-equality, still
+prefer `git hash-object "$f"` vs `git rev-parse HEAD:"$f"` — it is portable and
+does not depend on shell process-substitution semantics.
 
-### Pitfall — Windows `python.exe` cannot read MSYS `/c/...` paths (bash builtins can)
-On the Windows/MSYS host, a `bash` builtin like `test -f` resolves `/c/Users/...`
-correctly, but a native `python.exe` invoked with that same path throws
-`FileNotFoundError: [Errno 2] No such file or directory: '/c/Users/...'`. Same
-absolute path, opposite result — pure shell-vs-native-binary path semantics.
-This produces a maddening "file exists" (bash) vs "file not found" (python) split
-that looks like data loss. **Fix: pass Windows-style `$HOME/...` (forward
-slashes) to `python`/`python -c`/`python -m`, and `/c/...` (or `$HOME`) only to
-bash builtins (`test`, `cp`, `ls`, `git`).** Do NOT wrap `$VAR` containing an
-MSYS path inside a single-quoted python `-c` string — the shell won't expand it
-inside the quotes; interpolate via an unquoted `python -c "..."` with the literal
-`$HOME` path, or set `ref = "$HOME/..."` in Python directly.
+### Path semantics (NixOS/Linux)
+All tools — bash builtins, python, git — share the same POSIX filesystem. An
+absolute `/home/kei/...` path resolves identically everywhere; there is no
+drive-letter vs MSYS `/c/...` split to work around. Pass absolute paths or
+`os.path.join` and the "file exists in bash, not in python" class of bug cannot
+occur.
 
 ### Pitfall — don't conflate "committed artifacts are stale" with "refactor broke output"
 If an offline build from committed sources reproduces committed outputs
