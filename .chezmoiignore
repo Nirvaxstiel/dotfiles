@@ -44,3 +44,6 @@ AppData/**
 **/herdr/*.log
 **/herdr/agent-detection/
 **/herdr/sessions/
+
+# config.kdl is niri’s shipped default; only overrides.kdl is ours
+.config/niri/config.kdl

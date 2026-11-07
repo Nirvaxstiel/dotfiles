@@ -1,0 +1,7 @@
+# Noctalia config: deltas over the upstream defaults only
+# (noctalia-shell example.toml is the full annotated default set).
+
+[shell]
+# The system runs no other polkit agent (polkitd answers, nothing prompts),
+# so Noctalia's built-in agent is the only way GUI privilege prompts appear.
+polkit_agent = true
