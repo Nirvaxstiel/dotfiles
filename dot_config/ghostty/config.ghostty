@@ -7,7 +7,7 @@ unfocused-split-opacity = 1.0
 copy-on-select = clipboard
 
 background-opacity = 0.9
-background-blur-radius = 20
+background-blur = true
 
 font-family = "MesloLGM Nerd Font Mono"
 font-size = 12
