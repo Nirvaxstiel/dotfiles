@@ -47,3 +47,17 @@ AppData/**
 
 # config.kdl is niri’s shipped default; only overrides.kdl is ours
 .config/niri/config.kdl
+
+# Skills removed on purpose — never re-track them
+.hermes/skills/apple/**
+.hermes/skills/autonomous-ai-agents/autonomous-ai-agents/**
+.hermes/skills/creative/**
+.hermes/skills/gaming/**
+.hermes/skills/hermes-desktop-plugins/**
+.hermes/skills/hermes-themes/**
+.hermes/skills/kei-projects/**
+.hermes/skills/poe-patch-differ/**
+.hermes/skills/productivity/petdex/**
+.hermes/skills/productivity/sg-transit-routing/**
+.hermes/skills/red-teaming/**
+.hermes/skills/yuanbao/**
